@@ -1,0 +1,32 @@
+scalar UUID
+
+type Query {
+  pastas: [Pasta!]!
+  pasta(id: UUID!): Pasta
+  searchPastas(name: String!): [Pasta!]!
+}
+
+type Mutation {
+  createPasta(input: CreatePastaInput!): Pasta!
+  updatePasta(id: UUID!, input: UpdatePastaInput!): Pasta!
+  deletePasta(id: UUID!): Boolean!
+}
+
+type Pasta {
+  id: UUID!
+  name: String!
+  description: String!
+  price: Float!
+}
+
+input CreatePastaInput {
+  name: String!
+  description: String!
+  price: Float!
+}
+
+input UpdatePastaInput {
+  name: String!
+  description: String!
+  price: Float!
+}
