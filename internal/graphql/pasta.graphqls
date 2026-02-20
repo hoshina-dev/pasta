@@ -1,5 +1,3 @@
-scalar UUID
-
 type Query {
   pastas: [Pasta!]!
   pasta(id: UUID!): Pasta
