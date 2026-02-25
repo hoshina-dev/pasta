@@ -14,23 +14,23 @@ import (
 
 // CreatePasta is the resolver for the createPasta field.
 func (r *mutationResolver) CreatePasta(ctx context.Context, input CreatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Create(input.Name, input.Description, input.Price)
+	return r.PastaService.Create(ctx, input.Name, input.Description, input.Price)
 }
 
 // UpdatePasta is the resolver for the updatePasta field.
 func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input UpdatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Update(id, input.Name, input.Description, input.Price)
+	return r.PastaService.Update(ctx, id, input.Name, input.Description, input.Price)
 }
 
 // DeletePasta is the resolver for the deletePasta field.
 func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.PastaService.Delete(id)
+	err := r.PastaService.Delete(ctx, id)
 	return err == nil, err
 }
 
 // Pastas is the resolver for the pastas field.
 func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
-	pastas, err := r.PastaService.GetAll()
+	pastas, err := r.PastaService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,12 +43,12 @@ func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
 
 // Pasta is the resolver for the pasta field.
 func (r *queryResolver) Pasta(ctx context.Context, id uuid.UUID) (*model.Pasta, error) {
-	return r.PastaService.GetByID(id)
+	return r.PastaService.GetByID(ctx, id)
 }
 
 // SearchPastas is the resolver for the searchPastas field.
 func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model.Pasta, error) {
-	pastas, err := r.PastaService.Search(name)
+	pastas, err := r.PastaService.Search(ctx, name)
 	if err != nil {
 		return nil, err
 	}
