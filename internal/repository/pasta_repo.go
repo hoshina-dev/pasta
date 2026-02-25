@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PastaRepository interface {
@@ -27,13 +29,16 @@ func NewPastaRepository(db *gorm.DB) PastaRepository {
 
 func (r *pastaRepository) GetAll(ctx context.Context) ([]model.Pasta, error) {
 	var pastas []model.Pasta
-	err := r.db.WithContext(ctx).Find(&pastas).Error
+	err := r.db.WithContext(ctx).Preload(clause.Associations).Find(&pastas).Error
 	return pastas, err
 }
 
 func (r *pastaRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.Pasta, error) {
 	var pasta model.Pasta
-	err := r.db.WithContext(ctx).First(&pasta, "id = ?", id).Error
+	err := r.db.WithContext(ctx).Preload(clause.Associations).First(&pasta, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
