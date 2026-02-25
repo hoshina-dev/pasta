@@ -60,9 +60,16 @@ func (r *pastaRepository) Create(ctx context.Context, pasta *model.Pasta) error 
 }
 
 func (r *pastaRepository) Update(ctx context.Context, pasta *model.Pasta) error {
-	return r.db.WithContext(ctx).Save(pasta).Error
+	return r.db.WithContext(ctx).Clauses(clause.Returning{}).Save(pasta).Error
 }
 
 func (r *pastaRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	return r.db.WithContext(ctx).Delete(&model.Pasta{}, "id = ?", id).Error
+	res := r.db.WithContext(ctx).Delete(&model.Pasta{}, "id = ?", id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("part not found")
+	}
+	return nil
 }
