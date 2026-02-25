@@ -13,19 +13,24 @@ import (
 )
 
 // CreatePasta is the resolver for the createPasta field.
-func (r *mutationResolver) CreatePasta(ctx context.Context, input CreatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Create(ctx, input.Name, input.Description, input.Price)
+func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error) {
+	return r.PastaService.Create(ctx, input.Name, *input.Description, 0)
 }
 
 // UpdatePasta is the resolver for the updatePasta field.
-func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input UpdatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Update(ctx, id, input.Name, input.Description, input.Price)
+func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
+	return r.PastaService.Update(ctx, id, *input.Name, *input.Description, 0)
 }
 
 // DeletePasta is the resolver for the deletePasta field.
 func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool, error) {
 	err := r.PastaService.Delete(ctx, id)
 	return err == nil, err
+}
+
+// Images is the resolver for the images field.
+func (r *pastaResolver) Images(ctx context.Context, obj *model.Pasta) ([]string, error) {
+	return []string(obj.Images), nil
 }
 
 // Pastas is the resolver for the pastas field.
@@ -62,8 +67,12 @@ func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Pasta returns PastaResolver implementation.
+func (r *Resolver) Pasta() PastaResolver { return &pastaResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+type pastaResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
