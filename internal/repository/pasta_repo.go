@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
@@ -47,7 +48,10 @@ func (r *pastaRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.Pas
 
 func (r *pastaRepository) Search(ctx context.Context, name string) ([]model.Pasta, error) {
 	var pastas []model.Pasta
-	err := r.db.WithContext(ctx).Where("name ILIKE ?", "%"+name+"%").Find(&pastas).Error
+	name = strings.ReplaceAll(name, `\`, `\\`)
+	name = strings.ReplaceAll(name, `%`, `\%`)
+	name = strings.ReplaceAll(name, `_`, `\_`)
+	err := r.db.WithContext(ctx).Where("name ILIKE ? ESCAPE '\\'", "%"+name+"%").Find(&pastas).Error
 	return pastas, err
 }
 
