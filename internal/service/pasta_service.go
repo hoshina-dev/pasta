@@ -29,8 +29,7 @@ func (s *PastaService) Search(name string) ([]model.Pasta, error) {
 func (s *PastaService) Create(name, description string, price float64) (*model.Pasta, error) {
 	pasta := &model.Pasta{
 		Name:        name,
-		Description: description,
-		Price:       price,
+		Description: &description,
 	}
 	if err := s.repo.Create(pasta); err != nil {
 		return nil, err
@@ -44,8 +43,7 @@ func (s *PastaService) Update(id uuid.UUID, name, description string, price floa
 		return nil, err
 	}
 	pasta.Name = name
-	pasta.Description = description
-	pasta.Price = price
+	pasta.Description = &description
 	if err := s.repo.Update(pasta); err != nil {
 		return nil, err
 	}

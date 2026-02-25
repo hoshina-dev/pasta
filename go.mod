@@ -9,6 +9,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.11
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.11.2
 	github.com/vektah/gqlparser/v2 v2.5.31
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1

@@ -58,7 +58,6 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
-		Price       func(childComplexity int) int
 	}
 
 	Query struct {
@@ -150,12 +149,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Pasta.Name(childComplexity), true
-	case "Pasta.price":
-		if e.complexity.Pasta.Price == nil {
-			break
-		}
-
-		return e.complexity.Pasta.Price(childComplexity), true
 
 	case "Query.pasta":
 		if e.complexity.Query.Pasta == nil {
@@ -467,8 +460,6 @@ func (ec *executionContext) fieldContext_Mutation_createPasta(ctx context.Contex
 				return ec.fieldContext_Pasta_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Pasta_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Pasta_price(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
 		},
@@ -518,8 +509,6 @@ func (ec *executionContext) fieldContext_Mutation_updatePasta(ctx context.Contex
 				return ec.fieldContext_Pasta_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Pasta_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Pasta_price(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
 		},
@@ -647,7 +636,7 @@ func (ec *executionContext) _Pasta_description(ctx context.Context, field graphq
 			return obj.Description, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNString2ᚖstring,
 		true,
 		true,
 	)
@@ -661,35 +650,6 @@ func (ec *executionContext) fieldContext_Pasta_description(_ context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Pasta_price(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Pasta_price,
-		func(ctx context.Context) (any, error) {
-			return obj.Price, nil
-		},
-		nil,
-		ec.marshalNFloat2float64,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Pasta_price(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Pasta",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -725,8 +685,6 @@ func (ec *executionContext) fieldContext_Query_pastas(_ context.Context, field g
 				return ec.fieldContext_Pasta_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Pasta_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Pasta_price(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
 		},
@@ -765,8 +723,6 @@ func (ec *executionContext) fieldContext_Query_pasta(ctx context.Context, field 
 				return ec.fieldContext_Pasta_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Pasta_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Pasta_price(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
 		},
@@ -816,8 +772,6 @@ func (ec *executionContext) fieldContext_Query_searchPastas(ctx context.Context,
 				return ec.fieldContext_Pasta_name(ctx, field)
 			case "description":
 				return ec.fieldContext_Pasta_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Pasta_price(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
 		},
@@ -2569,11 +2523,6 @@ func (ec *executionContext) _Pasta(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "price":
-			out.Values[i] = ec._Pasta_price(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3148,6 +3097,28 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚖstring(ctx context.Context, v any) (*string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	_ = sel
+	res := graphql.MarshalString(*v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")

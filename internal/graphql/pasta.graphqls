@@ -14,7 +14,6 @@ type Pasta {
   id: UUID!
   name: String!
   description: String!
-  price: Float!
 }
 
 input CreatePastaInput {
