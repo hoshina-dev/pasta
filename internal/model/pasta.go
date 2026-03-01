@@ -21,7 +21,7 @@ type Pasta struct {
 	UserID           uuid.UUID
 	OrganizationID   uuid.UUID
 	Images           pq.StringArray `gorm:"type:text[];default:'{}'"`
-	Categories       []Category     `gorm:"many2many:part_categories"`
+	Categories       []Category     `gorm:"many2many:part_categories;joinForeignKey:PartId"`
 	CreatedAt        time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt        time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt        gorm.DeletedAt
