@@ -51,13 +51,12 @@ func (s *PastaService) Create(ctx context.Context, input model.CreatePastaInput)
 	return pasta, nil
 }
 
-func (s *PastaService) Update(ctx context.Context, id uuid.UUID, name, description string, price float64) (*model.Pasta, error) {
+func (s *PastaService) Update(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
 	pasta, err := s.partRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	pasta.Name = name
-	pasta.Description = &description
+	model.ApplyUpdatePartInput(pasta, input)
 	if err := s.partRepo.Update(ctx, pasta); err != nil {
 		return nil, err
 	}

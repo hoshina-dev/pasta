@@ -19,7 +19,7 @@ func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePa
 
 // UpdatePasta is the resolver for the updatePasta field.
 func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Update(ctx, id, *input.Name, *input.Description, 0)
+	return r.PastaService.Update(ctx, id, input)
 }
 
 // DeletePasta is the resolver for the deletePasta field.

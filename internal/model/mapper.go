@@ -17,3 +17,24 @@ func (p *CreatePastaInput) ToModel() *Pasta {
 	}
 	return part
 }
+
+func ApplyUpdatePartInput(part *Pasta, input UpdatePastaInput) {
+	if input.Name != nil {
+		part.Name = *input.Name
+	}
+	if input.Description != nil {
+		part.Description = input.Description
+	}
+	if input.Condition != nil {
+		part.Condition = *input.Condition
+	}
+	if input.TemperatureStage != nil {
+		part.TemperatureStage = input.TemperatureStage
+	}
+	if input.IsAvailable != nil {
+		part.IsAvailable = *input.IsAvailable
+	}
+	if input.Images != nil {
+		part.Images = input.Images
+	}
+}
