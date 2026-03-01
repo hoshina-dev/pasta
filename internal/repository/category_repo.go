@@ -13,6 +13,7 @@ import (
 type CategoryRepository interface {
 	Create(ctx context.Context, c *model.Category) error
 	GetByID(ctx context.Context, id uuid.UUID) (*model.Category, error)
+	GetByIDs(ctx context.Context, ids []uuid.UUID) ([]model.Category, error)
 	GetAll(ctx context.Context) ([]model.Category, error)
 	Update(ctx context.Context, c *model.Category) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -58,6 +59,20 @@ func (r *categoryRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.
 		return nil, nil
 	}
 	return &c, err
+}
+
+func (r *categoryRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]model.Category, error) {
+	var items []model.Category
+
+	if len(ids) == 0 {
+		return items, nil
+	}
+
+	if err := r.db.WithContext(ctx).Where("id IN ?", ids).Find(&items).Error; err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }
 
 // Update implements [CategoryRepository].
