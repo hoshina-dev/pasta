@@ -33,21 +33,28 @@ func (s *PastaService) Search(ctx context.Context, name string) ([]model.Pasta, 
 
 func (s *PastaService) Create(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error) {
 	// Verify manufacturer exists
-	if m, err := s.manufacturerRepo.GetByID(ctx, input.ManufacturerID); err != nil || m == nil {
+	m, err := s.manufacturerRepo.GetByID(ctx, input.ManufacturerID)
+	if err != nil || m == nil {
 		return nil, fmt.Errorf("manufacturer with id %s not found", input.ManufacturerID)
 	}
 
 	// Verify categories exists
-	for _, cid := range input.CategoryIDs {
-		if c, err := s.categoryRepo.GetByID(ctx, cid); err != nil || c == nil {
+	categories := make([]model.Category, len(input.CategoryIDs))
+	for i, cid := range input.CategoryIDs {
+		c, err := s.categoryRepo.GetByID(ctx, cid)
+		if err != nil || c == nil {
 			return nil, fmt.Errorf("category with id %s not found", cid)
 		}
+		categories[i] = *c
 	}
 
 	pasta := input.ToModel()
+	pasta.Manufacturer = *m
+	pasta.Categories = categories
 	if err := s.partRepo.Create(ctx, pasta); err != nil {
 		return nil, err
 	}
+
 	return pasta, nil
 }
 
