@@ -39,13 +39,12 @@ func (s *PastaService) Create(ctx context.Context, input model.CreatePastaInput)
 	}
 
 	// Verify categories exists
-	categories := make([]model.Category, len(input.CategoryIDs))
-	for i, cid := range input.CategoryIDs {
-		c, err := s.categoryRepo.GetByID(ctx, cid)
-		if err != nil || c == nil {
-			return nil, fmt.Errorf("category with id %s not found", cid)
-		}
-		categories[i] = *c
+	categories, err := s.categoryRepo.GetByIDs(ctx, input.CategoryIDs)
+	if err != nil {
+		return nil, err
+	}
+	if len(categories) != len(input.CategoryIDs) {
+		return nil, fmt.Errorf("one or more categories not found")
 	}
 
 	pasta := input.ToModel()
@@ -59,11 +58,23 @@ func (s *PastaService) Create(ctx context.Context, input model.CreatePastaInput)
 }
 
 func (s *PastaService) Update(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
+	// Verify part exists
 	pasta, err := s.partRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+
+	// Verify categories exists
+	categories, err := s.categoryRepo.GetByIDs(ctx, input.CategoryIDs)
+	if err != nil {
+		return nil, err
+	}
+	if len(categories) != len(input.CategoryIDs) {
+		return nil, fmt.Errorf("one or more categories not found")
+	}
+
 	model.ApplyUpdatePartInput(pasta, input)
+	pasta.Categories = categories
 	if err := s.partRepo.Update(ctx, pasta); err != nil {
 		return nil, err
 	}
