@@ -14,7 +14,7 @@ import (
 
 // CreatePasta is the resolver for the createPasta field.
 func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Create(ctx, input.Name, *input.Description, 0)
+	return r.PastaService.Create(ctx, input)
 }
 
 // UpdatePasta is the resolver for the updatePasta field.

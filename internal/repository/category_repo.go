@@ -11,10 +11,10 @@ import (
 )
 
 type CategoryRepository interface {
-	Create(ctx context.Context, m *model.Category) error
+	Create(ctx context.Context, c *model.Category) error
 	GetByID(ctx context.Context, id uuid.UUID) (*model.Category, error)
 	GetAll(ctx context.Context) ([]model.Category, error)
-	Update(ctx context.Context, m *model.Category) error
+	Update(ctx context.Context, c *model.Category) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -27,8 +27,8 @@ func NewCategoryRepository(db *gorm.DB) CategoryRepository {
 }
 
 // Create implements [CategoryRepository].
-func (r *categoryRepository) Create(ctx context.Context, m *model.Category) error {
-	return r.db.WithContext(ctx).Create(m).Error
+func (r *categoryRepository) Create(ctx context.Context, c *model.Category) error {
+	return r.db.WithContext(ctx).Create(c).Error
 }
 
 // Delete implements [CategoryRepository].
@@ -52,15 +52,15 @@ func (r *categoryRepository) GetAll(ctx context.Context) ([]model.Category, erro
 
 // GetByID implements [CategoryRepository].
 func (r *categoryRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.Category, error) {
-	var m model.Category
-	err := r.db.WithContext(ctx).First(&m, "id = ?", id).Error
+	var c model.Category
+	err := r.db.WithContext(ctx).First(&c, "id = ?", id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &m, err
+	return &c, err
 }
 
 // Update implements [CategoryRepository].
-func (r *categoryRepository) Update(ctx context.Context, m *model.Category) error {
-	return r.db.WithContext(ctx).Clauses(clause.Returning{}).Save(m).Error
+func (r *categoryRepository) Update(ctx context.Context, c *model.Category) error {
+	return r.db.WithContext(ctx).Clauses(clause.Returning{}).Save(c).Error
 }
