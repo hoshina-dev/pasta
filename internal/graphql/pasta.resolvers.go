@@ -8,17 +8,26 @@ package graphql
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
 )
 
 // CreatePasta is the resolver for the createPasta field.
 func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error) {
+	validate := validator.New()
+	if err := validate.Struct(input); err != nil {
+		return nil, err
+	}
 	return r.PastaService.Create(ctx, input)
 }
 
 // UpdatePasta is the resolver for the updatePasta field.
 func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
+	validate := validator.New()
+	if err := validate.Struct(input); err != nil {
+		return nil, err
+	}
 	return r.PastaService.Update(ctx, id, input)
 }
 
