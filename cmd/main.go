@@ -20,7 +20,9 @@ func main() {
 	}
 
 	pastaRepo := repository.NewPastaRepository(db)
-	pastaSvc := service.NewPastaService(pastaRepo)
+	manufacturerRepo := repository.NewManufacturerRepository(db)
+	categoryRepo := repository.NewCategoryRepository(db)
+	pastaSvc := service.NewPastaService(pastaRepo, manufacturerRepo, categoryRepo)
 
 	resolver := &graphql.Resolver{
 		PastaService: pastaSvc,

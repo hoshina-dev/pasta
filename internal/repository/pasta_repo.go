@@ -1,18 +1,24 @@
 package repository
 
 import (
+	"context"
+	"errors"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PastaRepository interface {
-	GetAll() ([]model.Pasta, error)
-	GetByID(id uuid.UUID) (*model.Pasta, error)
-	Search(name string) ([]model.Pasta, error)
-	Create(pasta *model.Pasta) error
-	Update(pasta *model.Pasta) error
-	Delete(id uuid.UUID) error
+	GetAll(ctx context.Context) ([]model.Pasta, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*model.Pasta, error)
+	Search(ctx context.Context, name string) ([]model.Pasta, error)
+	Create(ctx context.Context, pasta *model.Pasta) error
+	Update(ctx context.Context, pasta *model.Pasta) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	setCategories(tx *gorm.DB, partID uuid.UUID, categories []model.Category) error
 }
 
 type pastaRepository struct {
@@ -23,35 +29,59 @@ func NewPastaRepository(db *gorm.DB) PastaRepository {
 	return &pastaRepository{db: db}
 }
 
-func (r *pastaRepository) GetAll() ([]model.Pasta, error) {
+func (r *pastaRepository) GetAll(ctx context.Context) ([]model.Pasta, error) {
 	var pastas []model.Pasta
-	err := r.db.Find(&pastas).Error
+	err := r.db.WithContext(ctx).Preload(clause.Associations).Find(&pastas).Error
 	return pastas, err
 }
 
-func (r *pastaRepository) GetByID(id uuid.UUID) (*model.Pasta, error) {
+func (r *pastaRepository) GetByID(ctx context.Context, id uuid.UUID) (*model.Pasta, error) {
 	var pasta model.Pasta
-	err := r.db.First(&pasta, "id = ?", id).Error
+	err := r.db.WithContext(ctx).Preload(clause.Associations).First(&pasta, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
 	return &pasta, nil
 }
 
-func (r *pastaRepository) Search(name string) ([]model.Pasta, error) {
+func (r *pastaRepository) Search(ctx context.Context, name string) ([]model.Pasta, error) {
 	var pastas []model.Pasta
-	err := r.db.Where("name ILIKE ?", "%"+name+"%").Find(&pastas).Error
+	name = strings.ReplaceAll(name, `\`, `\\`)
+	name = strings.ReplaceAll(name, `%`, `\%`)
+	name = strings.ReplaceAll(name, `_`, `\_`)
+	err := r.db.WithContext(ctx).Where("name ILIKE ? ESCAPE '\\'", "%"+name+"%").Find(&pastas).Error
 	return pastas, err
 }
 
-func (r *pastaRepository) Create(pasta *model.Pasta) error {
-	return r.db.Create(pasta).Error
+func (r *pastaRepository) Create(ctx context.Context, pasta *model.Pasta) error {
+	return r.db.WithContext(ctx).Create(pasta).Error
 }
 
-func (r *pastaRepository) Update(pasta *model.Pasta) error {
-	return r.db.Save(pasta).Error
+func (r *pastaRepository) Update(ctx context.Context, pasta *model.Pasta) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Update simple fields
+		if err := tx.Clauses(clause.Returning{}).Save(pasta).Error; err != nil {
+			return err
+		}
+		// Replace many2many relations
+		return r.setCategories(tx, pasta.ID, pasta.Categories)
+	})
 }
 
-func (r *pastaRepository) Delete(id uuid.UUID) error {
-	return r.db.Delete(&model.Pasta{}, "id = ?", id).Error
+func (r *pastaRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	res := r.db.WithContext(ctx).Delete(&model.Pasta{}, "id = ?", id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("part not found")
+	}
+	return nil
+}
+
+func (r *pastaRepository) setCategories(tx *gorm.DB, partID uuid.UUID, categories []model.Category) error {
+	return tx.Model(&model.Pasta{ID: partID}).Association("Categories").Replace(categories)
 }

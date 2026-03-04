@@ -8,29 +8,43 @@ package graphql
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
 )
 
 // CreatePasta is the resolver for the createPasta field.
-func (r *mutationResolver) CreatePasta(ctx context.Context, input CreatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Create(input.Name, input.Description, input.Price)
+func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error) {
+	validate := validator.New()
+	if err := validate.Struct(input); err != nil {
+		return nil, err
+	}
+	return r.PastaService.Create(ctx, input)
 }
 
 // UpdatePasta is the resolver for the updatePasta field.
-func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input UpdatePastaInput) (*model.Pasta, error) {
-	return r.PastaService.Update(id, input.Name, input.Description, input.Price)
+func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
+	validate := validator.New()
+	if err := validate.Struct(input); err != nil {
+		return nil, err
+	}
+	return r.PastaService.Update(ctx, id, input)
 }
 
 // DeletePasta is the resolver for the deletePasta field.
 func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.PastaService.Delete(id)
+	err := r.PastaService.Delete(ctx, id)
 	return err == nil, err
+}
+
+// Images is the resolver for the images field.
+func (r *pastaResolver) Images(ctx context.Context, obj *model.Pasta) ([]string, error) {
+	return []string(obj.Images), nil
 }
 
 // Pastas is the resolver for the pastas field.
 func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
-	pastas, err := r.PastaService.GetAll()
+	pastas, err := r.PastaService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,12 +57,12 @@ func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
 
 // Pasta is the resolver for the pasta field.
 func (r *queryResolver) Pasta(ctx context.Context, id uuid.UUID) (*model.Pasta, error) {
-	return r.PastaService.GetByID(id)
+	return r.PastaService.GetByID(ctx, id)
 }
 
 // SearchPastas is the resolver for the searchPastas field.
 func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model.Pasta, error) {
-	pastas, err := r.PastaService.Search(name)
+	pastas, err := r.PastaService.Search(ctx, name)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +76,12 @@ func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Pasta returns PastaResolver implementation.
+func (r *Resolver) Pasta() PastaResolver { return &pastaResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+type pastaResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

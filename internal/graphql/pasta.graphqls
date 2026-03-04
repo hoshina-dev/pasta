@@ -10,21 +10,53 @@ type Mutation {
   deletePasta(id: UUID!): Boolean!
 }
 
+type Manufacturer {
+  id: UUID!
+  name: String!
+  countryOfOrigin: String
+}
+
+type Category {
+  id: UUID!
+  name: String!
+}
+
 type Pasta {
   id: UUID!
   name: String!
-  description: String!
-  price: Float!
+  partNumber: String!
+  manufacturerId: UUID!
+  manufacturer: Manufacturer
+  description: String
+  condition: String!
+  temperatureStage: String
+  isAvailable: Boolean!
+  userId: UUID!
+  organizationId: UUID!
+  images: [String!]!
+  categories: [Category!]
 }
 
 input CreatePastaInput {
   name: String!
-  description: String!
-  price: Float!
+  partNumber: String!
+  manufacturerId: UUID!
+  description: String
+  condition: String!
+  temperatureStage: String
+  isAvailable: Boolean
+  userId: UUID!
+  organizationId: UUID!
+  images: [String!]!
+  categoryIds: [UUID!]!
 }
 
 input UpdatePastaInput {
-  name: String!
-  description: String!
-  price: Float!
+  name: String
+  description: String
+  condition: String
+  temperatureStage: String
+  isAvailable: Boolean
+  images: [String!]
+  categoryIds: [UUID!]
 }

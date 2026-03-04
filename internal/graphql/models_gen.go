@@ -2,20 +2,8 @@
 
 package graphql
 
-type CreatePastaInput struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-}
-
 type Mutation struct {
 }
 
 type Query struct {
-}
-
-type UpdatePastaInput struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
 }
