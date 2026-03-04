@@ -18,6 +18,7 @@ type PastaRepository interface {
 	Create(ctx context.Context, pasta *model.Pasta) error
 	Update(ctx context.Context, pasta *model.Pasta) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	setCategories(tx *gorm.DB, partID uuid.UUID, categories []model.Category) error
 }
 
 type pastaRepository struct {
@@ -60,7 +61,14 @@ func (r *pastaRepository) Create(ctx context.Context, pasta *model.Pasta) error 
 }
 
 func (r *pastaRepository) Update(ctx context.Context, pasta *model.Pasta) error {
-	return r.db.WithContext(ctx).Clauses(clause.Returning{}).Save(pasta).Error
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Update simple fields
+		if err := tx.Clauses(clause.Returning{}).Save(pasta).Error; err != nil {
+			return err
+		}
+		// Replace many2many relations
+		return r.setCategories(tx, pasta.ID, pasta.Categories)
+	})
 }
 
 func (r *pastaRepository) Delete(ctx context.Context, id uuid.UUID) error {
@@ -72,4 +80,8 @@ func (r *pastaRepository) Delete(ctx context.Context, id uuid.UUID) error {
 		return errors.New("part not found")
 	}
 	return nil
+}
+
+func (r *pastaRepository) setCategories(tx *gorm.DB, partID uuid.UUID, categories []model.Category) error {
+	return tx.Model(&model.Pasta{ID: partID}).Association("Categories").Replace(categories)
 }
