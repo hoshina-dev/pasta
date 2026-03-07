@@ -8,7 +8,7 @@ package graphql
 import (
 	"context"
 
-	"github.com/go-playground/validator/v10"
+	validator "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
 )
@@ -19,7 +19,7 @@ func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePa
 	if err := validate.Struct(input); err != nil {
 		return nil, err
 	}
-	return r.PastaService.Create(ctx, input)
+	return r.pastaService.Create(ctx, input)
 }
 
 // UpdatePasta is the resolver for the updatePasta field.
@@ -28,13 +28,23 @@ func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input 
 	if err := validate.Struct(input); err != nil {
 		return nil, err
 	}
-	return r.PastaService.Update(ctx, id, input)
+	return r.pastaService.Update(ctx, id, input)
 }
 
 // DeletePasta is the resolver for the deletePasta field.
 func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.PastaService.Delete(ctx, id)
+	err := r.pastaService.Delete(ctx, id)
 	return err == nil, err
+}
+
+// CreateManufacturer is the resolver for the createManufacturer field.
+func (r *mutationResolver) CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error) {
+	return r.manufacturerService.Create(ctx, input)
+}
+
+// CreateCategory is the resolver for the createCategory field.
+func (r *mutationResolver) CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error) {
+	return r.categoryService.Create(ctx, input)
 }
 
 // Images is the resolver for the images field.
@@ -44,7 +54,7 @@ func (r *pastaResolver) Images(ctx context.Context, obj *model.Pasta) ([]string,
 
 // Pastas is the resolver for the pastas field.
 func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
-	pastas, err := r.PastaService.GetAll(ctx)
+	pastas, err := r.pastaService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -57,18 +67,49 @@ func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
 
 // Pasta is the resolver for the pasta field.
 func (r *queryResolver) Pasta(ctx context.Context, id uuid.UUID) (*model.Pasta, error) {
-	return r.PastaService.GetByID(ctx, id)
+	return r.pastaService.GetByID(ctx, id)
 }
 
 // SearchPastas is the resolver for the searchPastas field.
 func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model.Pasta, error) {
-	pastas, err := r.PastaService.Search(ctx, name)
+	pastas, err := r.pastaService.Search(ctx, name)
 	if err != nil {
 		return nil, err
 	}
 	result := make([]*model.Pasta, len(pastas))
 	for i := range pastas {
 		result[i] = &pastas[i]
+	}
+	return result, nil
+}
+
+// Manufacturer is the resolver for the manufacturer field.
+func (r *queryResolver) Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error) {
+	return r.manufacturerService.GetByID(ctx, id)
+}
+
+// Manufacturers is the resolver for the manufacturers field.
+func (r *queryResolver) Manufacturers(ctx context.Context) ([]*model.Manufacturer, error) {
+	items, err := r.manufacturerService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.Manufacturer, len(items))
+	for i, m := range items {
+		result[i] = &m
+	}
+	return result, nil
+}
+
+// Categories is the resolver for the categories field.
+func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
+	items, err := r.categoryService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.Category, len(items))
+	for i, c := range items {
+		result[i] = &c
 	}
 	return result, nil
 }

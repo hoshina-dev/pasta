@@ -2,12 +2,17 @@ type Query {
   pastas: [Pasta!]!
   pasta(id: UUID!): Pasta
   searchPastas(name: String!): [Pasta!]!
+  manufacturer(id: UUID!): Manufacturer
+  manufacturers: [Manufacturer!]!
+  categories: [Category!]!
 }
 
 type Mutation {
   createPasta(input: CreatePastaInput!): Pasta!
   updatePasta(id: UUID!, input: UpdatePastaInput!): Pasta!
   deletePasta(id: UUID!): Boolean!
+  createManufacturer(input: CreateManufacturerInput!): Manufacturer!
+  createCategory(input: CreateCategoryInput!): Category!
 }
 
 type Manufacturer {
@@ -59,4 +64,13 @@ input UpdatePastaInput {
   isAvailable: Boolean
   images: [String!]
   categoryIds: [UUID!]
+}
+
+input CreateManufacturerInput {
+  name: String!
+  countryOfOrigin: String
+}
+
+input CreateCategoryInput {
+  name: String!
 }
