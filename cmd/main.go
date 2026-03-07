@@ -23,10 +23,10 @@ func main() {
 	manufacturerRepo := repository.NewManufacturerRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	pastaSvc := service.NewPastaService(pastaRepo, manufacturerRepo, categoryRepo)
+	manufacturerSvc := service.NewManufacturerService(manufacturerRepo)
+	categorySvc := service.NewCategoryService(categoryRepo)
 
-	resolver := &graphql.Resolver{
-		PastaService: pastaSvc,
-	}
+	resolver := graphql.NewResolver(pastaSvc, manufacturerSvc, categorySvc)
 
 	app := server.New(resolver, cfg.CORSOrigins)
 
