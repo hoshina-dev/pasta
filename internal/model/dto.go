@@ -25,3 +25,12 @@ type UpdatePastaInput struct {
 	Images           []string    `validate:"omitempty,dive,url"`
 	CategoryIDs      []uuid.UUID `validate:"omitempty,dive,uuid4"`
 }
+
+type CreateCategoryInput struct {
+	Name string `json:"name"`
+}
+
+type CreateManufacturerInput struct {
+	Name            string  `json:"name"`
+	CountryOfOrigin *string `json:"countryOfOrigin,omitempty"`
+}

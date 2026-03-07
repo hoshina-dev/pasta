@@ -61,9 +61,11 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreatePasta func(childComplexity int, input model.CreatePastaInput) int
-		DeletePasta func(childComplexity int, id uuid.UUID) int
-		UpdatePasta func(childComplexity int, id uuid.UUID, input model.UpdatePastaInput) int
+		CreateCategory     func(childComplexity int, input model.CreateCategoryInput) int
+		CreateManufacturer func(childComplexity int, input model.CreateManufacturerInput) int
+		CreatePasta        func(childComplexity int, input model.CreatePastaInput) int
+		DeletePasta        func(childComplexity int, id uuid.UUID) int
+		UpdatePasta        func(childComplexity int, id uuid.UUID, input model.UpdatePastaInput) int
 	}
 
 	Pasta struct {
@@ -83,9 +85,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Pasta        func(childComplexity int, id uuid.UUID) int
-		Pastas       func(childComplexity int) int
-		SearchPastas func(childComplexity int, name string) int
+		Categories    func(childComplexity int) int
+		Manufacturer  func(childComplexity int, id uuid.UUID) int
+		Manufacturers func(childComplexity int) int
+		Pasta         func(childComplexity int, id uuid.UUID) int
+		Pastas        func(childComplexity int) int
+		SearchPastas  func(childComplexity int, name string) int
 	}
 }
 
@@ -93,6 +98,8 @@ type MutationResolver interface {
 	CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error)
 	UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error)
 	DeletePasta(ctx context.Context, id uuid.UUID) (bool, error)
+	CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error)
+	CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error)
 }
 type PastaResolver interface {
 	Images(ctx context.Context, obj *model.Pasta) ([]string, error)
@@ -101,6 +108,9 @@ type QueryResolver interface {
 	Pastas(ctx context.Context) ([]*model.Pasta, error)
 	Pasta(ctx context.Context, id uuid.UUID) (*model.Pasta, error)
 	SearchPastas(ctx context.Context, name string) ([]*model.Pasta, error)
+	Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error)
+	Manufacturers(ctx context.Context) ([]*model.Manufacturer, error)
+	Categories(ctx context.Context) ([]*model.Category, error)
 }
 
 type executableSchema struct {
@@ -154,6 +164,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Manufacturer.Name(childComplexity), true
 
+	case "Mutation.createCategory":
+		if e.complexity.Mutation.CreateCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createCategory_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateCategory(childComplexity, args["input"].(model.CreateCategoryInput)), true
+	case "Mutation.createManufacturer":
+		if e.complexity.Mutation.CreateManufacturer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createManufacturer_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateManufacturer(childComplexity, args["input"].(model.CreateManufacturerInput)), true
 	case "Mutation.createPasta":
 		if e.complexity.Mutation.CreatePasta == nil {
 			break
@@ -267,6 +299,29 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Pasta.UserID(childComplexity), true
 
+	case "Query.categories":
+		if e.complexity.Query.Categories == nil {
+			break
+		}
+
+		return e.complexity.Query.Categories(childComplexity), true
+	case "Query.manufacturer":
+		if e.complexity.Query.Manufacturer == nil {
+			break
+		}
+
+		args, err := ec.field_Query_manufacturer_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Manufacturer(childComplexity, args["id"].(uuid.UUID)), true
+	case "Query.manufacturers":
+		if e.complexity.Query.Manufacturers == nil {
+			break
+		}
+
+		return e.complexity.Query.Manufacturers(childComplexity), true
 	case "Query.pasta":
 		if e.complexity.Query.Pasta == nil {
 			break
@@ -304,6 +359,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCreateCategoryInput,
+		ec.unmarshalInputCreateManufacturerInput,
 		ec.unmarshalInputCreatePastaInput,
 		ec.unmarshalInputUpdatePastaInput,
 	)
@@ -423,6 +480,28 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateCategoryInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreateCategoryInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createManufacturer_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateManufacturerInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreateManufacturerInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createPasta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -469,6 +548,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_manufacturer_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -864,6 +954,102 @@ func (ec *executionContext) fieldContext_Mutation_deletePasta(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deletePasta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createManufacturer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createManufacturer,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CreateManufacturer(ctx, fc.Args["input"].(model.CreateManufacturerInput))
+		},
+		nil,
+		ec.marshalNManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createManufacturer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Manufacturer_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Manufacturer_name(ctx, field)
+			case "countryOfOrigin":
+				return ec.fieldContext_Manufacturer_countryOfOrigin(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Manufacturer", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createManufacturer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createCategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createCategory,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CreateCategory(ctx, fc.Args["input"].(model.CreateCategoryInput))
+		},
+		nil,
+		ec.marshalNCategory2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCategory,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createCategory(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Category_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Category_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Category", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createCategory_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1452,6 +1638,127 @@ func (ec *executionContext) fieldContext_Query_searchPastas(ctx context.Context,
 	if fc.Args, err = ec.field_Query_searchPastas_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_manufacturer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_manufacturer,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Manufacturer(ctx, fc.Args["id"].(uuid.UUID))
+		},
+		nil,
+		ec.marshalOManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_manufacturer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Manufacturer_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Manufacturer_name(ctx, field)
+			case "countryOfOrigin":
+				return ec.fieldContext_Manufacturer_countryOfOrigin(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Manufacturer", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_manufacturer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_manufacturers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_manufacturers,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Manufacturers(ctx)
+		},
+		nil,
+		ec.marshalNManufacturer2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturerᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_manufacturers(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Manufacturer_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Manufacturer_name(ctx, field)
+			case "countryOfOrigin":
+				return ec.fieldContext_Manufacturer_countryOfOrigin(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Manufacturer", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_categories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_categories,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Categories(ctx)
+		},
+		nil,
+		ec.marshalNCategory2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCategoryᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_categories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Category_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Category_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Category", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -3010,6 +3317,67 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCreateCategoryInput(ctx context.Context, obj any) (model.CreateCategoryInput, error) {
+	var it model.CreateCategoryInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateManufacturerInput(ctx context.Context, obj any) (model.CreateManufacturerInput, error) {
+	var it model.CreateManufacturerInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "countryOfOrigin"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "countryOfOrigin":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("countryOfOrigin"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CountryOfOrigin = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreatePastaInput(ctx context.Context, obj any) (model.CreatePastaInput, error) {
 	var it model.CreatePastaInput
 	asMap := map[string]any{}
@@ -3314,6 +3682,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createManufacturer":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createManufacturer(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createCategory":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createCategory(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3525,6 +3907,69 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_searchPastas(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "manufacturer":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_manufacturer(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "manufacturers":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_manufacturers(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "categories":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_categories(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3923,9 +4368,131 @@ func (ec *executionContext) marshalNCategory2githubᚗcomᚋhoshinaᚑdevᚋpast
 	return ec._Category(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNCategory2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Category) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCategory2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCategory(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCategory(ctx context.Context, sel ast.SelectionSet, v *model.Category) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Category(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCreateCategoryInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreateCategoryInput(ctx context.Context, v any) (model.CreateCategoryInput, error) {
+	res, err := ec.unmarshalInputCreateCategoryInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateManufacturerInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreateManufacturerInput(ctx context.Context, v any) (model.CreateManufacturerInput, error) {
+	res, err := ec.unmarshalInputCreateManufacturerInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreatePastaInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreatePastaInput(ctx context.Context, v any) (model.CreatePastaInput, error) {
 	res, err := ec.unmarshalInputCreatePastaInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNManufacturer2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v model.Manufacturer) graphql.Marshaler {
+	return ec._Manufacturer(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNManufacturer2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturerᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Manufacturer) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v *model.Manufacturer) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Manufacturer(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPasta2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta(ctx context.Context, sel ast.SelectionSet, v model.Pasta) graphql.Marshaler {
@@ -4415,6 +4982,13 @@ func (ec *executionContext) marshalOCategory2ᚕgithubᚗcomᚋhoshinaᚑdevᚋp
 
 func (ec *executionContext) marshalOManufacturer2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v model.Manufacturer) graphql.Marshaler {
 	return ec._Manufacturer(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v *model.Manufacturer) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Manufacturer(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta(ctx context.Context, sel ast.SelectionSet, v *model.Pasta) graphql.Marshaler {

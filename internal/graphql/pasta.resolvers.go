@@ -7,8 +7,9 @@ package graphql
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/go-playground/validator/v10"
+	validator "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/model"
 )
@@ -35,6 +36,16 @@ func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input 
 func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool, error) {
 	err := r.PastaService.Delete(ctx, id)
 	return err == nil, err
+}
+
+// CreateManufacturer is the resolver for the createManufacturer field.
+func (r *mutationResolver) CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error) {
+	panic(fmt.Errorf("not implemented: CreateManufacturer - createManufacturer"))
+}
+
+// CreateCategory is the resolver for the createCategory field.
+func (r *mutationResolver) CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error) {
+	panic(fmt.Errorf("not implemented: CreateCategory - createCategory"))
 }
 
 // Images is the resolver for the images field.
@@ -71,6 +82,21 @@ func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model
 		result[i] = &pastas[i]
 	}
 	return result, nil
+}
+
+// Manufacturer is the resolver for the manufacturer field.
+func (r *queryResolver) Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error) {
+	panic(fmt.Errorf("not implemented: Manufacturer - manufacturer"))
+}
+
+// Manufacturers is the resolver for the manufacturers field.
+func (r *queryResolver) Manufacturers(ctx context.Context) ([]*model.Manufacturer, error) {
+	panic(fmt.Errorf("not implemented: Manufacturers - manufacturers"))
+}
+
+// Categories is the resolver for the categories field.
+func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
+	panic(fmt.Errorf("not implemented: Categories - categories"))
 }
 
 // Mutation returns MutationResolver implementation.
