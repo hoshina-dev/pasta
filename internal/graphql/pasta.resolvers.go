@@ -7,7 +7,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	validator "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -40,12 +39,12 @@ func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool,
 
 // CreateManufacturer is the resolver for the createManufacturer field.
 func (r *mutationResolver) CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error) {
-	panic(fmt.Errorf("not implemented: CreateManufacturer - createManufacturer"))
+	return r.manufacturerService.Create(ctx, input)
 }
 
 // CreateCategory is the resolver for the createCategory field.
 func (r *mutationResolver) CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error) {
-	panic(fmt.Errorf("not implemented: CreateCategory - createCategory"))
+	return r.categoryService.Create(ctx, input)
 }
 
 // Images is the resolver for the images field.
@@ -86,17 +85,33 @@ func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model
 
 // Manufacturer is the resolver for the manufacturer field.
 func (r *queryResolver) Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error) {
-	panic(fmt.Errorf("not implemented: Manufacturer - manufacturer"))
+	return r.manufacturerService.GetByID(ctx, id)
 }
 
 // Manufacturers is the resolver for the manufacturers field.
 func (r *queryResolver) Manufacturers(ctx context.Context) ([]*model.Manufacturer, error) {
-	panic(fmt.Errorf("not implemented: Manufacturers - manufacturers"))
+	items, err := r.manufacturerService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.Manufacturer, len(items))
+	for i, m := range items {
+		result[i] = &m
+	}
+	return result, nil
 }
 
 // Categories is the resolver for the categories field.
 func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
-	panic(fmt.Errorf("not implemented: Categories - categories"))
+	items, err := r.categoryService.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.Category, len(items))
+	for i, c := range items {
+		result[i] = &c
+	}
+	return result, nil
 }
 
 // Mutation returns MutationResolver implementation.
