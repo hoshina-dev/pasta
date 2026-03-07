@@ -31,7 +31,7 @@ func (s *ManufacturerService) GetByID(ctx context.Context, id uuid.UUID) (*model
 	return s.repo.GetByID(ctx, id)
 }
 
-func (s *ManufacturerService) GetAll(ctx context.Context, limit, offset int) ([]model.Manufacturer, error) {
+func (s *ManufacturerService) GetAll(ctx context.Context) ([]model.Manufacturer, error) {
 	return s.repo.GetAll(ctx)
 }
 
