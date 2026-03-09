@@ -37,16 +37,6 @@ func (r *mutationResolver) DeletePart(ctx context.Context, id uuid.UUID) (bool, 
 	return err == nil, err
 }
 
-// CreateManufacturer is the resolver for the createManufacturer field.
-func (r *mutationResolver) CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error) {
-	return r.manufacturerService.Create(ctx, input)
-}
-
-// CreateCategory is the resolver for the createCategory field.
-func (r *mutationResolver) CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error) {
-	return r.categoryService.Create(ctx, input)
-}
-
 // Images is the resolver for the images field.
 func (r *partResolver) Images(ctx context.Context, obj *model.Part) ([]string, error) {
 	return []string(obj.Images), nil
@@ -79,37 +69,6 @@ func (r *queryResolver) SearchParts(ctx context.Context, name string) ([]*model.
 	result := make([]*model.Part, len(parts))
 	for i := range parts {
 		result[i] = &parts[i]
-	}
-	return result, nil
-}
-
-// Manufacturer is the resolver for the manufacturer field.
-func (r *queryResolver) Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error) {
-	return r.manufacturerService.GetByID(ctx, id)
-}
-
-// Manufacturers is the resolver for the manufacturers field.
-func (r *queryResolver) Manufacturers(ctx context.Context) ([]*model.Manufacturer, error) {
-	items, err := r.manufacturerService.GetAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result := make([]*model.Manufacturer, len(items))
-	for i, m := range items {
-		result[i] = &m
-	}
-	return result, nil
-}
-
-// Categories is the resolver for the categories field.
-func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
-	items, err := r.categoryService.GetAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result := make([]*model.Category, len(items))
-	for i, c := range items {
-		result[i] = &c
 	}
 	return result, nil
 }

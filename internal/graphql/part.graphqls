@@ -2,28 +2,12 @@ type Query {
   parts: [Part!]!
   part(id: UUID!): Part
   searchParts(name: String!): [Part!]!
-  manufacturer(id: UUID!): Manufacturer
-  manufacturers: [Manufacturer!]!
-  categories: [Category!]!
 }
 
 type Mutation {
   createPart(input: CreatePartInput!): Part!
   updatePart(id: UUID!, input: UpdatePartInput!): Part!
   deletePart(id: UUID!): Boolean!
-  createManufacturer(input: CreateManufacturerInput!): Manufacturer!
-  createCategory(input: CreateCategoryInput!): Category!
-}
-
-type Manufacturer {
-  id: UUID!
-  name: String!
-  countryOfOrigin: String
-}
-
-type Category {
-  id: UUID!
-  name: String!
 }
 
 type Part {
@@ -64,13 +48,4 @@ input UpdatePartInput {
   isAvailable: Boolean
   images: [String!]
   categoryIds: [UUID!]
-}
-
-input CreateManufacturerInput {
-  name: String!
-  countryOfOrigin: String
-}
-
-input CreateCategoryInput {
-  name: String!
 }

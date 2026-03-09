@@ -1,0 +1,19 @@
+extend type Query {
+  manufacturer(id: UUID!): Manufacturer
+  manufacturers: [Manufacturer!]!
+}
+
+extend type Mutation {
+  createManufacturer(input: CreateManufacturerInput!): Manufacturer!
+}
+
+type Manufacturer {
+  id: UUID!
+  name: String!
+  countryOfOrigin: String
+}
+
+input CreateManufacturerInput {
+  name: String!
+  countryOfOrigin: String
+}
