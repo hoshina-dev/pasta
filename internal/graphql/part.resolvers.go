@@ -13,27 +13,27 @@ import (
 	"github.com/hoshina-dev/pasta/internal/model"
 )
 
-// CreatePasta is the resolver for the createPasta field.
-func (r *mutationResolver) CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error) {
+// CreatePart is the resolver for the createPart field.
+func (r *mutationResolver) CreatePart(ctx context.Context, input model.CreatePartInput) (*model.Part, error) {
 	validate := validator.New()
 	if err := validate.Struct(input); err != nil {
 		return nil, err
 	}
-	return r.pastaService.Create(ctx, input)
+	return r.partService.Create(ctx, input)
 }
 
-// UpdatePasta is the resolver for the updatePasta field.
-func (r *mutationResolver) UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error) {
+// UpdatePart is the resolver for the updatePart field.
+func (r *mutationResolver) UpdatePart(ctx context.Context, id uuid.UUID, input model.UpdatePartInput) (*model.Part, error) {
 	validate := validator.New()
 	if err := validate.Struct(input); err != nil {
 		return nil, err
 	}
-	return r.pastaService.Update(ctx, id, input)
+	return r.partService.Update(ctx, id, input)
 }
 
-// DeletePasta is the resolver for the deletePasta field.
-func (r *mutationResolver) DeletePasta(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.pastaService.Delete(ctx, id)
+// DeletePart is the resolver for the deletePart field.
+func (r *mutationResolver) DeletePart(ctx context.Context, id uuid.UUID) (bool, error) {
+	err := r.partService.Delete(ctx, id)
 	return err == nil, err
 }
 
@@ -48,37 +48,37 @@ func (r *mutationResolver) CreateCategory(ctx context.Context, input model.Creat
 }
 
 // Images is the resolver for the images field.
-func (r *pastaResolver) Images(ctx context.Context, obj *model.Pasta) ([]string, error) {
+func (r *partResolver) Images(ctx context.Context, obj *model.Part) ([]string, error) {
 	return []string(obj.Images), nil
 }
 
-// Pastas is the resolver for the pastas field.
-func (r *queryResolver) Pastas(ctx context.Context) ([]*model.Pasta, error) {
-	pastas, err := r.pastaService.GetAll(ctx)
+// Parts is the resolver for the parts field.
+func (r *queryResolver) Parts(ctx context.Context) ([]*model.Part, error) {
+	parts, err := r.partService.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Pasta, len(pastas))
-	for i := range pastas {
-		result[i] = &pastas[i]
+	result := make([]*model.Part, len(parts))
+	for i := range parts {
+		result[i] = &parts[i]
 	}
 	return result, nil
 }
 
-// Pasta is the resolver for the pasta field.
-func (r *queryResolver) Pasta(ctx context.Context, id uuid.UUID) (*model.Pasta, error) {
-	return r.pastaService.GetByID(ctx, id)
+// Part is the resolver for the part field.
+func (r *queryResolver) Part(ctx context.Context, id uuid.UUID) (*model.Part, error) {
+	return r.partService.GetByID(ctx, id)
 }
 
-// SearchPastas is the resolver for the searchPastas field.
-func (r *queryResolver) SearchPastas(ctx context.Context, name string) ([]*model.Pasta, error) {
-	pastas, err := r.pastaService.Search(ctx, name)
+// SearchParts is the resolver for the searchParts field.
+func (r *queryResolver) SearchParts(ctx context.Context, name string) ([]*model.Part, error) {
+	parts, err := r.partService.Search(ctx, name)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.Pasta, len(pastas))
-	for i := range pastas {
-		result[i] = &pastas[i]
+	result := make([]*model.Part, len(parts))
+	for i := range parts {
+		result[i] = &parts[i]
 	}
 	return result, nil
 }
@@ -117,12 +117,12 @@ func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, erro
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Pasta returns PastaResolver implementation.
-func (r *Resolver) Pasta() PastaResolver { return &pastaResolver{r} }
+// Part returns PartResolver implementation.
+func (r *Resolver) Part() PartResolver { return &partResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
-type pastaResolver struct{ *Resolver }
+type partResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

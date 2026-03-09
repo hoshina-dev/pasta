@@ -2,7 +2,7 @@ package model
 
 import "github.com/google/uuid"
 
-type CreatePastaInput struct {
+type CreatePartInput struct {
 	Name             string    `validate:"required"`
 	PartNumber       string    `validate:"required"`
 	ManufacturerID   uuid.UUID `validate:"required,uuid4"`
@@ -16,7 +16,7 @@ type CreatePastaInput struct {
 	CategoryIDs      []uuid.UUID `validate:"omitempty,dive,uuid4"`
 }
 
-type UpdatePastaInput struct {
+type UpdatePartInput struct {
 	Name             *string
 	Description      *string
 	Condition        *string

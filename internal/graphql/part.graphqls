@@ -1,16 +1,16 @@
 type Query {
-  pastas: [Pasta!]!
-  pasta(id: UUID!): Pasta
-  searchPastas(name: String!): [Pasta!]!
+  parts: [Part!]!
+  part(id: UUID!): Part
+  searchParts(name: String!): [Part!]!
   manufacturer(id: UUID!): Manufacturer
   manufacturers: [Manufacturer!]!
   categories: [Category!]!
 }
 
 type Mutation {
-  createPasta(input: CreatePastaInput!): Pasta!
-  updatePasta(id: UUID!, input: UpdatePastaInput!): Pasta!
-  deletePasta(id: UUID!): Boolean!
+  createPart(input: CreatePartInput!): Part!
+  updatePart(id: UUID!, input: UpdatePartInput!): Part!
+  deletePart(id: UUID!): Boolean!
   createManufacturer(input: CreateManufacturerInput!): Manufacturer!
   createCategory(input: CreateCategoryInput!): Category!
 }
@@ -26,7 +26,7 @@ type Category {
   name: String!
 }
 
-type Pasta {
+type Part {
   id: UUID!
   name: String!
   partNumber: String!
@@ -42,7 +42,7 @@ type Pasta {
   categories: [Category!]
 }
 
-input CreatePastaInput {
+input CreatePartInput {
   name: String!
   partNumber: String!
   manufacturerId: UUID!
@@ -56,7 +56,7 @@ input CreatePastaInput {
   categoryIds: [UUID!]!
 }
 
-input UpdatePastaInput {
+input UpdatePartInput {
   name: String
   description: String
   condition: String

@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Pasta struct {
+type Part struct {
 	ID               uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	Name             string
 	PartNumber       string
@@ -27,6 +27,6 @@ type Pasta struct {
 	DeletedAt        gorm.DeletedAt
 }
 
-func (Pasta) TableName() string {
+func (Part) TableName() string {
 	return "parts"
 }

@@ -41,7 +41,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
-	Pasta() PastaResolver
+	Part() PartResolver
 	Query() QueryResolver
 }
 
@@ -63,12 +63,12 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateCategory     func(childComplexity int, input model.CreateCategoryInput) int
 		CreateManufacturer func(childComplexity int, input model.CreateManufacturerInput) int
-		CreatePasta        func(childComplexity int, input model.CreatePastaInput) int
-		DeletePasta        func(childComplexity int, id uuid.UUID) int
-		UpdatePasta        func(childComplexity int, id uuid.UUID, input model.UpdatePastaInput) int
+		CreatePart         func(childComplexity int, input model.CreatePartInput) int
+		DeletePart         func(childComplexity int, id uuid.UUID) int
+		UpdatePart         func(childComplexity int, id uuid.UUID, input model.UpdatePartInput) int
 	}
 
-	Pasta struct {
+	Part struct {
 		Categories       func(childComplexity int) int
 		Condition        func(childComplexity int) int
 		Description      func(childComplexity int) int
@@ -88,26 +88,26 @@ type ComplexityRoot struct {
 		Categories    func(childComplexity int) int
 		Manufacturer  func(childComplexity int, id uuid.UUID) int
 		Manufacturers func(childComplexity int) int
-		Pasta         func(childComplexity int, id uuid.UUID) int
-		Pastas        func(childComplexity int) int
-		SearchPastas  func(childComplexity int, name string) int
+		Part          func(childComplexity int, id uuid.UUID) int
+		Parts         func(childComplexity int) int
+		SearchParts   func(childComplexity int, name string) int
 	}
 }
 
 type MutationResolver interface {
-	CreatePasta(ctx context.Context, input model.CreatePastaInput) (*model.Pasta, error)
-	UpdatePasta(ctx context.Context, id uuid.UUID, input model.UpdatePastaInput) (*model.Pasta, error)
-	DeletePasta(ctx context.Context, id uuid.UUID) (bool, error)
+	CreatePart(ctx context.Context, input model.CreatePartInput) (*model.Part, error)
+	UpdatePart(ctx context.Context, id uuid.UUID, input model.UpdatePartInput) (*model.Part, error)
+	DeletePart(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error)
 	CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error)
 }
-type PastaResolver interface {
-	Images(ctx context.Context, obj *model.Pasta) ([]string, error)
+type PartResolver interface {
+	Images(ctx context.Context, obj *model.Part) ([]string, error)
 }
 type QueryResolver interface {
-	Pastas(ctx context.Context) ([]*model.Pasta, error)
-	Pasta(ctx context.Context, id uuid.UUID) (*model.Pasta, error)
-	SearchPastas(ctx context.Context, name string) ([]*model.Pasta, error)
+	Parts(ctx context.Context) ([]*model.Part, error)
+	Part(ctx context.Context, id uuid.UUID) (*model.Part, error)
+	SearchParts(ctx context.Context, name string) ([]*model.Part, error)
 	Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error)
 	Manufacturers(ctx context.Context) ([]*model.Manufacturer, error)
 	Categories(ctx context.Context) ([]*model.Category, error)
@@ -186,118 +186,118 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.CreateManufacturer(childComplexity, args["input"].(model.CreateManufacturerInput)), true
-	case "Mutation.createPasta":
-		if e.complexity.Mutation.CreatePasta == nil {
+	case "Mutation.createPart":
+		if e.complexity.Mutation.CreatePart == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createPasta_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_createPart_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePasta(childComplexity, args["input"].(model.CreatePastaInput)), true
-	case "Mutation.deletePasta":
-		if e.complexity.Mutation.DeletePasta == nil {
+		return e.complexity.Mutation.CreatePart(childComplexity, args["input"].(model.CreatePartInput)), true
+	case "Mutation.deletePart":
+		if e.complexity.Mutation.DeletePart == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_deletePasta_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_deletePart_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeletePasta(childComplexity, args["id"].(uuid.UUID)), true
-	case "Mutation.updatePasta":
-		if e.complexity.Mutation.UpdatePasta == nil {
+		return e.complexity.Mutation.DeletePart(childComplexity, args["id"].(uuid.UUID)), true
+	case "Mutation.updatePart":
+		if e.complexity.Mutation.UpdatePart == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updatePasta_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_updatePart_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePasta(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdatePastaInput)), true
+		return e.complexity.Mutation.UpdatePart(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdatePartInput)), true
 
-	case "Pasta.categories":
-		if e.complexity.Pasta.Categories == nil {
+	case "Part.categories":
+		if e.complexity.Part.Categories == nil {
 			break
 		}
 
-		return e.complexity.Pasta.Categories(childComplexity), true
-	case "Pasta.condition":
-		if e.complexity.Pasta.Condition == nil {
+		return e.complexity.Part.Categories(childComplexity), true
+	case "Part.condition":
+		if e.complexity.Part.Condition == nil {
 			break
 		}
 
-		return e.complexity.Pasta.Condition(childComplexity), true
-	case "Pasta.description":
-		if e.complexity.Pasta.Description == nil {
+		return e.complexity.Part.Condition(childComplexity), true
+	case "Part.description":
+		if e.complexity.Part.Description == nil {
 			break
 		}
 
-		return e.complexity.Pasta.Description(childComplexity), true
-	case "Pasta.id":
-		if e.complexity.Pasta.ID == nil {
+		return e.complexity.Part.Description(childComplexity), true
+	case "Part.id":
+		if e.complexity.Part.ID == nil {
 			break
 		}
 
-		return e.complexity.Pasta.ID(childComplexity), true
-	case "Pasta.images":
-		if e.complexity.Pasta.Images == nil {
+		return e.complexity.Part.ID(childComplexity), true
+	case "Part.images":
+		if e.complexity.Part.Images == nil {
 			break
 		}
 
-		return e.complexity.Pasta.Images(childComplexity), true
-	case "Pasta.isAvailable":
-		if e.complexity.Pasta.IsAvailable == nil {
+		return e.complexity.Part.Images(childComplexity), true
+	case "Part.isAvailable":
+		if e.complexity.Part.IsAvailable == nil {
 			break
 		}
 
-		return e.complexity.Pasta.IsAvailable(childComplexity), true
-	case "Pasta.manufacturer":
-		if e.complexity.Pasta.Manufacturer == nil {
+		return e.complexity.Part.IsAvailable(childComplexity), true
+	case "Part.manufacturer":
+		if e.complexity.Part.Manufacturer == nil {
 			break
 		}
 
-		return e.complexity.Pasta.Manufacturer(childComplexity), true
-	case "Pasta.manufacturerId":
-		if e.complexity.Pasta.ManufacturerID == nil {
+		return e.complexity.Part.Manufacturer(childComplexity), true
+	case "Part.manufacturerId":
+		if e.complexity.Part.ManufacturerID == nil {
 			break
 		}
 
-		return e.complexity.Pasta.ManufacturerID(childComplexity), true
-	case "Pasta.name":
-		if e.complexity.Pasta.Name == nil {
+		return e.complexity.Part.ManufacturerID(childComplexity), true
+	case "Part.name":
+		if e.complexity.Part.Name == nil {
 			break
 		}
 
-		return e.complexity.Pasta.Name(childComplexity), true
-	case "Pasta.organizationId":
-		if e.complexity.Pasta.OrganizationID == nil {
+		return e.complexity.Part.Name(childComplexity), true
+	case "Part.organizationId":
+		if e.complexity.Part.OrganizationID == nil {
 			break
 		}
 
-		return e.complexity.Pasta.OrganizationID(childComplexity), true
-	case "Pasta.partNumber":
-		if e.complexity.Pasta.PartNumber == nil {
+		return e.complexity.Part.OrganizationID(childComplexity), true
+	case "Part.partNumber":
+		if e.complexity.Part.PartNumber == nil {
 			break
 		}
 
-		return e.complexity.Pasta.PartNumber(childComplexity), true
-	case "Pasta.temperatureStage":
-		if e.complexity.Pasta.TemperatureStage == nil {
+		return e.complexity.Part.PartNumber(childComplexity), true
+	case "Part.temperatureStage":
+		if e.complexity.Part.TemperatureStage == nil {
 			break
 		}
 
-		return e.complexity.Pasta.TemperatureStage(childComplexity), true
-	case "Pasta.userId":
-		if e.complexity.Pasta.UserID == nil {
+		return e.complexity.Part.TemperatureStage(childComplexity), true
+	case "Part.userId":
+		if e.complexity.Part.UserID == nil {
 			break
 		}
 
-		return e.complexity.Pasta.UserID(childComplexity), true
+		return e.complexity.Part.UserID(childComplexity), true
 
 	case "Query.categories":
 		if e.complexity.Query.Categories == nil {
@@ -322,34 +322,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Manufacturers(childComplexity), true
-	case "Query.pasta":
-		if e.complexity.Query.Pasta == nil {
+	case "Query.part":
+		if e.complexity.Query.Part == nil {
 			break
 		}
 
-		args, err := ec.field_Query_pasta_args(ctx, rawArgs)
+		args, err := ec.field_Query_part_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Pasta(childComplexity, args["id"].(uuid.UUID)), true
-	case "Query.pastas":
-		if e.complexity.Query.Pastas == nil {
+		return e.complexity.Query.Part(childComplexity, args["id"].(uuid.UUID)), true
+	case "Query.parts":
+		if e.complexity.Query.Parts == nil {
 			break
 		}
 
-		return e.complexity.Query.Pastas(childComplexity), true
-	case "Query.searchPastas":
-		if e.complexity.Query.SearchPastas == nil {
+		return e.complexity.Query.Parts(childComplexity), true
+	case "Query.searchParts":
+		if e.complexity.Query.SearchParts == nil {
 			break
 		}
 
-		args, err := ec.field_Query_searchPastas_args(ctx, rawArgs)
+		args, err := ec.field_Query_searchParts_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchPastas(childComplexity, args["name"].(string)), true
+		return e.complexity.Query.SearchParts(childComplexity, args["name"].(string)), true
 
 	}
 	return 0, false
@@ -361,8 +361,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputCreateCategoryInput,
 		ec.unmarshalInputCreateManufacturerInput,
-		ec.unmarshalInputCreatePastaInput,
-		ec.unmarshalInputUpdatePastaInput,
+		ec.unmarshalInputCreatePartInput,
+		ec.unmarshalInputUpdatePartInput,
 	)
 	first := true
 
@@ -459,7 +459,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "common.graphqls" "pasta.graphqls"
+//go:embed "common.graphqls" "part.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -472,7 +472,7 @@ func sourceData(filename string) string {
 
 var sources = []*ast.Source{
 	{Name: "common.graphqls", Input: sourceData("common.graphqls"), BuiltIn: false},
-	{Name: "pasta.graphqls", Input: sourceData("pasta.graphqls"), BuiltIn: false},
+	{Name: "part.graphqls", Input: sourceData("part.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -502,10 +502,10 @@ func (ec *executionContext) field_Mutation_createManufacturer_args(ctx context.C
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createPasta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_createPart_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreatePastaInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreatePastaInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreatePartInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreatePartInput)
 	if err != nil {
 		return nil, err
 	}
@@ -513,7 +513,7 @@ func (ec *executionContext) field_Mutation_createPasta_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deletePasta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_deletePart_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
@@ -524,7 +524,7 @@ func (ec *executionContext) field_Mutation_deletePasta_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updatePasta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_updatePart_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
@@ -532,7 +532,7 @@ func (ec *executionContext) field_Mutation_updatePasta_args(ctx context.Context,
 		return nil, err
 	}
 	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdatePastaInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐUpdatePastaInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdatePartInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐUpdatePartInput)
 	if err != nil {
 		return nil, err
 	}
@@ -562,7 +562,7 @@ func (ec *executionContext) field_Query_manufacturer_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_pasta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_part_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID)
@@ -573,7 +573,7 @@ func (ec *executionContext) field_Query_pasta_args(ctx context.Context, rawArgs 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_searchPastas_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_searchParts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
@@ -781,24 +781,24 @@ func (ec *executionContext) fieldContext_Manufacturer_countryOfOrigin(_ context.
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_createPasta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createPart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_createPasta,
+		ec.fieldContext_Mutation_createPart,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreatePasta(ctx, fc.Args["input"].(model.CreatePastaInput))
+			return ec.resolvers.Mutation().CreatePart(ctx, fc.Args["input"].(model.CreatePartInput))
 		},
 		nil,
-		ec.marshalNPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta,
+		ec.marshalNPart2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_createPasta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createPart(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -807,33 +807,33 @@ func (ec *executionContext) fieldContext_Mutation_createPasta(ctx context.Contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Pasta_id(ctx, field)
+				return ec.fieldContext_Part_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Pasta_name(ctx, field)
+				return ec.fieldContext_Part_name(ctx, field)
 			case "partNumber":
-				return ec.fieldContext_Pasta_partNumber(ctx, field)
+				return ec.fieldContext_Part_partNumber(ctx, field)
 			case "manufacturerId":
-				return ec.fieldContext_Pasta_manufacturerId(ctx, field)
+				return ec.fieldContext_Part_manufacturerId(ctx, field)
 			case "manufacturer":
-				return ec.fieldContext_Pasta_manufacturer(ctx, field)
+				return ec.fieldContext_Part_manufacturer(ctx, field)
 			case "description":
-				return ec.fieldContext_Pasta_description(ctx, field)
+				return ec.fieldContext_Part_description(ctx, field)
 			case "condition":
-				return ec.fieldContext_Pasta_condition(ctx, field)
+				return ec.fieldContext_Part_condition(ctx, field)
 			case "temperatureStage":
-				return ec.fieldContext_Pasta_temperatureStage(ctx, field)
+				return ec.fieldContext_Part_temperatureStage(ctx, field)
 			case "isAvailable":
-				return ec.fieldContext_Pasta_isAvailable(ctx, field)
+				return ec.fieldContext_Part_isAvailable(ctx, field)
 			case "userId":
-				return ec.fieldContext_Pasta_userId(ctx, field)
+				return ec.fieldContext_Part_userId(ctx, field)
 			case "organizationId":
-				return ec.fieldContext_Pasta_organizationId(ctx, field)
+				return ec.fieldContext_Part_organizationId(ctx, field)
 			case "images":
-				return ec.fieldContext_Pasta_images(ctx, field)
+				return ec.fieldContext_Part_images(ctx, field)
 			case "categories":
-				return ec.fieldContext_Pasta_categories(ctx, field)
+				return ec.fieldContext_Part_categories(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Part", field.Name)
 		},
 	}
 	defer func() {
@@ -843,31 +843,31 @@ func (ec *executionContext) fieldContext_Mutation_createPasta(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createPasta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_createPart_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_updatePasta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_updatePart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_updatePasta,
+		ec.fieldContext_Mutation_updatePart,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdatePasta(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdatePastaInput))
+			return ec.resolvers.Mutation().UpdatePart(ctx, fc.Args["id"].(uuid.UUID), fc.Args["input"].(model.UpdatePartInput))
 		},
 		nil,
-		ec.marshalNPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta,
+		ec.marshalNPart2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_updatePasta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updatePart(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -876,33 +876,33 @@ func (ec *executionContext) fieldContext_Mutation_updatePasta(ctx context.Contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Pasta_id(ctx, field)
+				return ec.fieldContext_Part_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Pasta_name(ctx, field)
+				return ec.fieldContext_Part_name(ctx, field)
 			case "partNumber":
-				return ec.fieldContext_Pasta_partNumber(ctx, field)
+				return ec.fieldContext_Part_partNumber(ctx, field)
 			case "manufacturerId":
-				return ec.fieldContext_Pasta_manufacturerId(ctx, field)
+				return ec.fieldContext_Part_manufacturerId(ctx, field)
 			case "manufacturer":
-				return ec.fieldContext_Pasta_manufacturer(ctx, field)
+				return ec.fieldContext_Part_manufacturer(ctx, field)
 			case "description":
-				return ec.fieldContext_Pasta_description(ctx, field)
+				return ec.fieldContext_Part_description(ctx, field)
 			case "condition":
-				return ec.fieldContext_Pasta_condition(ctx, field)
+				return ec.fieldContext_Part_condition(ctx, field)
 			case "temperatureStage":
-				return ec.fieldContext_Pasta_temperatureStage(ctx, field)
+				return ec.fieldContext_Part_temperatureStage(ctx, field)
 			case "isAvailable":
-				return ec.fieldContext_Pasta_isAvailable(ctx, field)
+				return ec.fieldContext_Part_isAvailable(ctx, field)
 			case "userId":
-				return ec.fieldContext_Pasta_userId(ctx, field)
+				return ec.fieldContext_Part_userId(ctx, field)
 			case "organizationId":
-				return ec.fieldContext_Pasta_organizationId(ctx, field)
+				return ec.fieldContext_Part_organizationId(ctx, field)
 			case "images":
-				return ec.fieldContext_Pasta_images(ctx, field)
+				return ec.fieldContext_Part_images(ctx, field)
 			case "categories":
-				return ec.fieldContext_Pasta_categories(ctx, field)
+				return ec.fieldContext_Part_categories(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Part", field.Name)
 		},
 	}
 	defer func() {
@@ -912,22 +912,22 @@ func (ec *executionContext) fieldContext_Mutation_updatePasta(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updatePasta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updatePart_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_deletePasta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_deletePart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_deletePasta,
+		ec.fieldContext_Mutation_deletePart,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DeletePasta(ctx, fc.Args["id"].(uuid.UUID))
+			return ec.resolvers.Mutation().DeletePart(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -936,7 +936,7 @@ func (ec *executionContext) _Mutation_deletePasta(ctx context.Context, field gra
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_deletePasta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_deletePart(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -953,7 +953,7 @@ func (ec *executionContext) fieldContext_Mutation_deletePasta(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deletePasta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_deletePart_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1056,12 +1056,12 @@ func (ec *executionContext) fieldContext_Mutation_createCategory(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_id(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_id(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_id,
+		ec.fieldContext_Part_id,
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
@@ -1072,9 +1072,9 @@ func (ec *executionContext) _Pasta_id(ctx context.Context, field graphql.Collect
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1085,12 +1085,12 @@ func (ec *executionContext) fieldContext_Pasta_id(_ context.Context, field graph
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_name(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_name(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_name,
+		ec.fieldContext_Part_name,
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
 		},
@@ -1101,9 +1101,9 @@ func (ec *executionContext) _Pasta_name(ctx context.Context, field graphql.Colle
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1114,12 +1114,12 @@ func (ec *executionContext) fieldContext_Pasta_name(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_partNumber(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_partNumber(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_partNumber,
+		ec.fieldContext_Part_partNumber,
 		func(ctx context.Context) (any, error) {
 			return obj.PartNumber, nil
 		},
@@ -1130,9 +1130,9 @@ func (ec *executionContext) _Pasta_partNumber(ctx context.Context, field graphql
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_partNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_partNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1143,12 +1143,12 @@ func (ec *executionContext) fieldContext_Pasta_partNumber(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_manufacturerId(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_manufacturerId(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_manufacturerId,
+		ec.fieldContext_Part_manufacturerId,
 		func(ctx context.Context) (any, error) {
 			return obj.ManufacturerID, nil
 		},
@@ -1159,9 +1159,9 @@ func (ec *executionContext) _Pasta_manufacturerId(ctx context.Context, field gra
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_manufacturerId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_manufacturerId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1172,12 +1172,12 @@ func (ec *executionContext) fieldContext_Pasta_manufacturerId(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_manufacturer(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_manufacturer(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_manufacturer,
+		ec.fieldContext_Part_manufacturer,
 		func(ctx context.Context) (any, error) {
 			return obj.Manufacturer, nil
 		},
@@ -1188,9 +1188,9 @@ func (ec *executionContext) _Pasta_manufacturer(ctx context.Context, field graph
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_manufacturer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_manufacturer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1209,12 +1209,12 @@ func (ec *executionContext) fieldContext_Pasta_manufacturer(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_description(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_description(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_description,
+		ec.fieldContext_Part_description,
 		func(ctx context.Context) (any, error) {
 			return obj.Description, nil
 		},
@@ -1225,9 +1225,9 @@ func (ec *executionContext) _Pasta_description(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1238,12 +1238,12 @@ func (ec *executionContext) fieldContext_Pasta_description(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_condition(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_condition(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_condition,
+		ec.fieldContext_Part_condition,
 		func(ctx context.Context) (any, error) {
 			return obj.Condition, nil
 		},
@@ -1254,9 +1254,9 @@ func (ec *executionContext) _Pasta_condition(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_condition(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_condition(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1267,12 +1267,12 @@ func (ec *executionContext) fieldContext_Pasta_condition(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_temperatureStage(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_temperatureStage(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_temperatureStage,
+		ec.fieldContext_Part_temperatureStage,
 		func(ctx context.Context) (any, error) {
 			return obj.TemperatureStage, nil
 		},
@@ -1283,9 +1283,9 @@ func (ec *executionContext) _Pasta_temperatureStage(ctx context.Context, field g
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_temperatureStage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_temperatureStage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1296,12 +1296,12 @@ func (ec *executionContext) fieldContext_Pasta_temperatureStage(_ context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_isAvailable(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_isAvailable(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_isAvailable,
+		ec.fieldContext_Part_isAvailable,
 		func(ctx context.Context) (any, error) {
 			return obj.IsAvailable, nil
 		},
@@ -1312,9 +1312,9 @@ func (ec *executionContext) _Pasta_isAvailable(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_isAvailable(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_isAvailable(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1325,12 +1325,12 @@ func (ec *executionContext) fieldContext_Pasta_isAvailable(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_userId(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_userId(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_userId,
+		ec.fieldContext_Part_userId,
 		func(ctx context.Context) (any, error) {
 			return obj.UserID, nil
 		},
@@ -1341,9 +1341,9 @@ func (ec *executionContext) _Pasta_userId(ctx context.Context, field graphql.Col
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1354,12 +1354,12 @@ func (ec *executionContext) fieldContext_Pasta_userId(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_organizationId(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_organizationId(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_organizationId,
+		ec.fieldContext_Part_organizationId,
 		func(ctx context.Context) (any, error) {
 			return obj.OrganizationID, nil
 		},
@@ -1370,9 +1370,9 @@ func (ec *executionContext) _Pasta_organizationId(ctx context.Context, field gra
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_organizationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_organizationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1383,14 +1383,14 @@ func (ec *executionContext) fieldContext_Pasta_organizationId(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_images(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_images(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_images,
+		ec.fieldContext_Part_images,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Pasta().Images(ctx, obj)
+			return ec.resolvers.Part().Images(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2ᚕstringᚄ,
@@ -1399,9 +1399,9 @@ func (ec *executionContext) _Pasta_images(ctx context.Context, field graphql.Col
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_images(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_images(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -1412,12 +1412,12 @@ func (ec *executionContext) fieldContext_Pasta_images(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Pasta_categories(ctx context.Context, field graphql.CollectedField, obj *model.Pasta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Part_categories(ctx context.Context, field graphql.CollectedField, obj *model.Part) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pasta_categories,
+		ec.fieldContext_Part_categories,
 		func(ctx context.Context) (any, error) {
 			return obj.Categories, nil
 		},
@@ -1428,9 +1428,9 @@ func (ec *executionContext) _Pasta_categories(ctx context.Context, field graphql
 	)
 }
 
-func (ec *executionContext) fieldContext_Pasta_categories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Part_categories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Pasta",
+		Object:     "Part",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1447,23 +1447,23 @@ func (ec *executionContext) fieldContext_Pasta_categories(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_pastas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_parts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_pastas,
+		ec.fieldContext_Query_parts,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Pastas(ctx)
+			return ec.resolvers.Query().Parts(ctx)
 		},
 		nil,
-		ec.marshalNPasta2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPastaᚄ,
+		ec.marshalNPart2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPartᚄ,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_pastas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_parts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1472,56 +1472,56 @@ func (ec *executionContext) fieldContext_Query_pastas(_ context.Context, field g
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Pasta_id(ctx, field)
+				return ec.fieldContext_Part_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Pasta_name(ctx, field)
+				return ec.fieldContext_Part_name(ctx, field)
 			case "partNumber":
-				return ec.fieldContext_Pasta_partNumber(ctx, field)
+				return ec.fieldContext_Part_partNumber(ctx, field)
 			case "manufacturerId":
-				return ec.fieldContext_Pasta_manufacturerId(ctx, field)
+				return ec.fieldContext_Part_manufacturerId(ctx, field)
 			case "manufacturer":
-				return ec.fieldContext_Pasta_manufacturer(ctx, field)
+				return ec.fieldContext_Part_manufacturer(ctx, field)
 			case "description":
-				return ec.fieldContext_Pasta_description(ctx, field)
+				return ec.fieldContext_Part_description(ctx, field)
 			case "condition":
-				return ec.fieldContext_Pasta_condition(ctx, field)
+				return ec.fieldContext_Part_condition(ctx, field)
 			case "temperatureStage":
-				return ec.fieldContext_Pasta_temperatureStage(ctx, field)
+				return ec.fieldContext_Part_temperatureStage(ctx, field)
 			case "isAvailable":
-				return ec.fieldContext_Pasta_isAvailable(ctx, field)
+				return ec.fieldContext_Part_isAvailable(ctx, field)
 			case "userId":
-				return ec.fieldContext_Pasta_userId(ctx, field)
+				return ec.fieldContext_Part_userId(ctx, field)
 			case "organizationId":
-				return ec.fieldContext_Pasta_organizationId(ctx, field)
+				return ec.fieldContext_Part_organizationId(ctx, field)
 			case "images":
-				return ec.fieldContext_Pasta_images(ctx, field)
+				return ec.fieldContext_Part_images(ctx, field)
 			case "categories":
-				return ec.fieldContext_Pasta_categories(ctx, field)
+				return ec.fieldContext_Part_categories(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Part", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_pasta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_part(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_pasta,
+		ec.fieldContext_Query_part,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Pasta(ctx, fc.Args["id"].(uuid.UUID))
+			return ec.resolvers.Query().Part(ctx, fc.Args["id"].(uuid.UUID))
 		},
 		nil,
-		ec.marshalOPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta,
+		ec.marshalOPart2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart,
 		true,
 		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_pasta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_part(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1530,33 +1530,33 @@ func (ec *executionContext) fieldContext_Query_pasta(ctx context.Context, field 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Pasta_id(ctx, field)
+				return ec.fieldContext_Part_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Pasta_name(ctx, field)
+				return ec.fieldContext_Part_name(ctx, field)
 			case "partNumber":
-				return ec.fieldContext_Pasta_partNumber(ctx, field)
+				return ec.fieldContext_Part_partNumber(ctx, field)
 			case "manufacturerId":
-				return ec.fieldContext_Pasta_manufacturerId(ctx, field)
+				return ec.fieldContext_Part_manufacturerId(ctx, field)
 			case "manufacturer":
-				return ec.fieldContext_Pasta_manufacturer(ctx, field)
+				return ec.fieldContext_Part_manufacturer(ctx, field)
 			case "description":
-				return ec.fieldContext_Pasta_description(ctx, field)
+				return ec.fieldContext_Part_description(ctx, field)
 			case "condition":
-				return ec.fieldContext_Pasta_condition(ctx, field)
+				return ec.fieldContext_Part_condition(ctx, field)
 			case "temperatureStage":
-				return ec.fieldContext_Pasta_temperatureStage(ctx, field)
+				return ec.fieldContext_Part_temperatureStage(ctx, field)
 			case "isAvailable":
-				return ec.fieldContext_Pasta_isAvailable(ctx, field)
+				return ec.fieldContext_Part_isAvailable(ctx, field)
 			case "userId":
-				return ec.fieldContext_Pasta_userId(ctx, field)
+				return ec.fieldContext_Part_userId(ctx, field)
 			case "organizationId":
-				return ec.fieldContext_Pasta_organizationId(ctx, field)
+				return ec.fieldContext_Part_organizationId(ctx, field)
 			case "images":
-				return ec.fieldContext_Pasta_images(ctx, field)
+				return ec.fieldContext_Part_images(ctx, field)
 			case "categories":
-				return ec.fieldContext_Pasta_categories(ctx, field)
+				return ec.fieldContext_Part_categories(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Part", field.Name)
 		},
 	}
 	defer func() {
@@ -1566,31 +1566,31 @@ func (ec *executionContext) fieldContext_Query_pasta(ctx context.Context, field 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_pasta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_part_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_searchPastas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_searchParts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchPastas,
+		ec.fieldContext_Query_searchParts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchPastas(ctx, fc.Args["name"].(string))
+			return ec.resolvers.Query().SearchParts(ctx, fc.Args["name"].(string))
 		},
 		nil,
-		ec.marshalNPasta2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPastaᚄ,
+		ec.marshalNPart2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPartᚄ,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_searchPastas(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_searchParts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1599,33 +1599,33 @@ func (ec *executionContext) fieldContext_Query_searchPastas(ctx context.Context,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Pasta_id(ctx, field)
+				return ec.fieldContext_Part_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Pasta_name(ctx, field)
+				return ec.fieldContext_Part_name(ctx, field)
 			case "partNumber":
-				return ec.fieldContext_Pasta_partNumber(ctx, field)
+				return ec.fieldContext_Part_partNumber(ctx, field)
 			case "manufacturerId":
-				return ec.fieldContext_Pasta_manufacturerId(ctx, field)
+				return ec.fieldContext_Part_manufacturerId(ctx, field)
 			case "manufacturer":
-				return ec.fieldContext_Pasta_manufacturer(ctx, field)
+				return ec.fieldContext_Part_manufacturer(ctx, field)
 			case "description":
-				return ec.fieldContext_Pasta_description(ctx, field)
+				return ec.fieldContext_Part_description(ctx, field)
 			case "condition":
-				return ec.fieldContext_Pasta_condition(ctx, field)
+				return ec.fieldContext_Part_condition(ctx, field)
 			case "temperatureStage":
-				return ec.fieldContext_Pasta_temperatureStage(ctx, field)
+				return ec.fieldContext_Part_temperatureStage(ctx, field)
 			case "isAvailable":
-				return ec.fieldContext_Pasta_isAvailable(ctx, field)
+				return ec.fieldContext_Part_isAvailable(ctx, field)
 			case "userId":
-				return ec.fieldContext_Pasta_userId(ctx, field)
+				return ec.fieldContext_Part_userId(ctx, field)
 			case "organizationId":
-				return ec.fieldContext_Pasta_organizationId(ctx, field)
+				return ec.fieldContext_Part_organizationId(ctx, field)
 			case "images":
-				return ec.fieldContext_Pasta_images(ctx, field)
+				return ec.fieldContext_Part_images(ctx, field)
 			case "categories":
-				return ec.fieldContext_Pasta_categories(ctx, field)
+				return ec.fieldContext_Part_categories(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Pasta", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Part", field.Name)
 		},
 	}
 	defer func() {
@@ -1635,7 +1635,7 @@ func (ec *executionContext) fieldContext_Query_searchPastas(ctx context.Context,
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchPastas_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_searchParts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3378,8 +3378,8 @@ func (ec *executionContext) unmarshalInputCreateManufacturerInput(ctx context.Co
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreatePastaInput(ctx context.Context, obj any) (model.CreatePastaInput, error) {
-	var it model.CreatePastaInput
+func (ec *executionContext) unmarshalInputCreatePartInput(ctx context.Context, obj any) (model.CreatePartInput, error) {
+	var it model.CreatePartInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -3475,8 +3475,8 @@ func (ec *executionContext) unmarshalInputCreatePastaInput(ctx context.Context, 
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdatePastaInput(ctx context.Context, obj any) (model.UpdatePastaInput, error) {
-	var it model.UpdatePastaInput
+func (ec *executionContext) unmarshalInputUpdatePartInput(ctx context.Context, obj any) (model.UpdatePartInput, error) {
+	var it model.UpdatePartInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -3661,23 +3661,23 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createPasta":
+		case "createPart":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createPasta(ctx, field)
+				return ec._Mutation_createPart(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "updatePasta":
+		case "updatePart":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updatePasta(ctx, field)
+				return ec._Mutation_updatePart(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "deletePasta":
+		case "deletePart":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deletePasta(ctx, field)
+				return ec._Mutation_deletePart(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3719,60 +3719,60 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var pastaImplementors = []string{"Pasta"}
+var partImplementors = []string{"Part"}
 
-func (ec *executionContext) _Pasta(ctx context.Context, sel ast.SelectionSet, obj *model.Pasta) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, pastaImplementors)
+func (ec *executionContext) _Part(ctx context.Context, sel ast.SelectionSet, obj *model.Part) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, partImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Pasta")
+			out.Values[i] = graphql.MarshalString("Part")
 		case "id":
-			out.Values[i] = ec._Pasta_id(ctx, field, obj)
+			out.Values[i] = ec._Part_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._Pasta_name(ctx, field, obj)
+			out.Values[i] = ec._Part_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "partNumber":
-			out.Values[i] = ec._Pasta_partNumber(ctx, field, obj)
+			out.Values[i] = ec._Part_partNumber(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "manufacturerId":
-			out.Values[i] = ec._Pasta_manufacturerId(ctx, field, obj)
+			out.Values[i] = ec._Part_manufacturerId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "manufacturer":
-			out.Values[i] = ec._Pasta_manufacturer(ctx, field, obj)
+			out.Values[i] = ec._Part_manufacturer(ctx, field, obj)
 		case "description":
-			out.Values[i] = ec._Pasta_description(ctx, field, obj)
+			out.Values[i] = ec._Part_description(ctx, field, obj)
 		case "condition":
-			out.Values[i] = ec._Pasta_condition(ctx, field, obj)
+			out.Values[i] = ec._Part_condition(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "temperatureStage":
-			out.Values[i] = ec._Pasta_temperatureStage(ctx, field, obj)
+			out.Values[i] = ec._Part_temperatureStage(ctx, field, obj)
 		case "isAvailable":
-			out.Values[i] = ec._Pasta_isAvailable(ctx, field, obj)
+			out.Values[i] = ec._Part_isAvailable(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "userId":
-			out.Values[i] = ec._Pasta_userId(ctx, field, obj)
+			out.Values[i] = ec._Part_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "organizationId":
-			out.Values[i] = ec._Pasta_organizationId(ctx, field, obj)
+			out.Values[i] = ec._Part_organizationId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -3785,7 +3785,7 @@ func (ec *executionContext) _Pasta(ctx context.Context, sel ast.SelectionSet, ob
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Pasta_images(ctx, field, obj)
+				res = ec._Part_images(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3813,7 +3813,7 @@ func (ec *executionContext) _Pasta(ctx context.Context, sel ast.SelectionSet, ob
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "categories":
-			out.Values[i] = ec._Pasta_categories(ctx, field, obj)
+			out.Values[i] = ec._Part_categories(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3856,7 +3856,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "pastas":
+		case "parts":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3865,7 +3865,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_pastas(ctx, field)
+				res = ec._Query_parts(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3878,7 +3878,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "pasta":
+		case "part":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3887,7 +3887,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_pasta(ctx, field)
+				res = ec._Query_part(ctx, field)
 				return res
 			}
 
@@ -3897,7 +3897,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "searchPastas":
+		case "searchParts":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3906,7 +3906,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_searchPastas(ctx, field)
+				res = ec._Query_searchParts(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4432,8 +4432,8 @@ func (ec *executionContext) unmarshalNCreateManufacturerInput2githubᚗcomᚋhos
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreatePastaInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreatePastaInput(ctx context.Context, v any) (model.CreatePastaInput, error) {
-	res, err := ec.unmarshalInputCreatePastaInput(ctx, v)
+func (ec *executionContext) unmarshalNCreatePartInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐCreatePartInput(ctx context.Context, v any) (model.CreatePartInput, error) {
+	res, err := ec.unmarshalInputCreatePartInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4495,11 +4495,11 @@ func (ec *executionContext) marshalNManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdev
 	return ec._Manufacturer(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPasta2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta(ctx context.Context, sel ast.SelectionSet, v model.Pasta) graphql.Marshaler {
-	return ec._Pasta(ctx, sel, &v)
+func (ec *executionContext) marshalNPart2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart(ctx context.Context, sel ast.SelectionSet, v model.Part) graphql.Marshaler {
+	return ec._Part(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPasta2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPastaᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Pasta) graphql.Marshaler {
+func (ec *executionContext) marshalNPart2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPartᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Part) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4523,7 +4523,7 @@ func (ec *executionContext) marshalNPasta2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋp
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta(ctx, sel, v[i])
+			ret[i] = ec.marshalNPart2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4543,14 +4543,14 @@ func (ec *executionContext) marshalNPasta2ᚕᚖgithubᚗcomᚋhoshinaᚑdevᚋp
 	return ret
 }
 
-func (ec *executionContext) marshalNPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta(ctx context.Context, sel ast.SelectionSet, v *model.Pasta) graphql.Marshaler {
+func (ec *executionContext) marshalNPart2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart(ctx context.Context, sel ast.SelectionSet, v *model.Part) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._Pasta(ctx, sel, v)
+	return ec._Part(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -4645,8 +4645,8 @@ func (ec *executionContext) marshalNUUID2ᚕgithubᚗcomᚋgoogleᚋuuidᚐUUID�
 	return ret
 }
 
-func (ec *executionContext) unmarshalNUpdatePastaInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐUpdatePastaInput(ctx context.Context, v any) (model.UpdatePastaInput, error) {
-	res, err := ec.unmarshalInputUpdatePastaInput(ctx, v)
+func (ec *executionContext) unmarshalNUpdatePartInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐUpdatePartInput(ctx context.Context, v any) (model.UpdatePartInput, error) {
+	res, err := ec.unmarshalInputUpdatePartInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4991,11 +4991,11 @@ func (ec *executionContext) marshalOManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdev
 	return ec._Manufacturer(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPasta2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPasta(ctx context.Context, sel ast.SelectionSet, v *model.Pasta) graphql.Marshaler {
+func (ec *executionContext) marshalOPart2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart(ctx context.Context, sel ast.SelectionSet, v *model.Part) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Pasta(ctx, sel, v)
+	return ec._Part(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
