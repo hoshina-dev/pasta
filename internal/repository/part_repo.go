@@ -52,7 +52,7 @@ func (r *partRepository) Search(ctx context.Context, name string) ([]model.Part,
 	name = strings.ReplaceAll(name, `\`, `\\`)
 	name = strings.ReplaceAll(name, `%`, `\%`)
 	name = strings.ReplaceAll(name, `_`, `\_`)
-	err := r.db.WithContext(ctx).Where("name ILIKE ? ESCAPE '\\'", "%"+name+"%").Find(&parts).Error
+	err := r.db.WithContext(ctx).Preload(clause.Associations).Where("name ILIKE ? ESCAPE '\\'", "%"+name+"%").Find(&parts).Error
 	return parts, err
 }
 
