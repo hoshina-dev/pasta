@@ -1,0 +1,16 @@
+extend type Query {
+  categories: [Category!]!
+}
+
+extend type Mutation {
+  createCategory(input: CreateCategoryInput!): Category!
+}
+
+type Category {
+  id: UUID!
+  name: String!
+}
+
+input CreateCategoryInput {
+  name: String!
+}

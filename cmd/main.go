@@ -19,14 +19,14 @@ func main() {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
 
-	pastaRepo := repository.NewPastaRepository(db)
+	partRepo := repository.NewPartRepository(db)
 	manufacturerRepo := repository.NewManufacturerRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
-	pastaSvc := service.NewPastaService(pastaRepo, manufacturerRepo, categoryRepo)
+	partSvc := service.NewPartService(partRepo, manufacturerRepo, categoryRepo)
+	manufacturerSvc := service.NewManufacturerService(manufacturerRepo)
+	categorySvc := service.NewCategoryService(categoryRepo)
 
-	resolver := &graphql.Resolver{
-		PastaService: pastaSvc,
-	}
+	resolver := graphql.NewResolver(partSvc, manufacturerSvc, categorySvc)
 
 	app := server.New(resolver, cfg.CORSOrigins)
 

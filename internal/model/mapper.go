@@ -1,7 +1,7 @@
 package model
 
-func (p *CreatePastaInput) ToModel() *Pasta {
-	part := &Pasta{
+func (p *CreatePartInput) ToModel() *Part {
+	part := &Part{
 		Name:             p.Name,
 		PartNumber:       p.PartNumber,
 		ManufacturerID:   p.ManufacturerID,
@@ -18,7 +18,7 @@ func (p *CreatePastaInput) ToModel() *Pasta {
 	return part
 }
 
-func ApplyUpdatePartInput(part *Pasta, input UpdatePastaInput) {
+func ApplyUpdatePartInput(part *Part, input UpdatePartInput) {
 	if input.Name != nil {
 		part.Name = *input.Name
 	}
