@@ -13,6 +13,7 @@ type Part3DModelRepository interface {
 	Create(ctx context.Context, m *model.Part3DModel) error
 	GetByID(ctx context.Context, id uuid.UUID) (*model.Part3DModel, error)
 	GetByPartID(ctx context.Context, partID uuid.UUID) ([]*model.Part3DModel, error)
+	UpdateStatus(ctx context.Context, id uuid.UUID, status string, processedURL *string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -44,6 +45,12 @@ func (r *part3DModelRepository) GetByPartID(ctx context.Context, partID uuid.UUI
 	var models []*model.Part3DModel
 	err := r.db.WithContext(ctx).Where("part_id = ?", partID).Order("created_at ASC").Find(&models).Error
 	return models, err
+}
+
+func (r *part3DModelRepository) UpdateStatus(ctx context.Context, id uuid.UUID, status string, processedURL *string) error {
+	return r.db.WithContext(ctx).Model(&model.Part3DModel{}).
+		Where("id = ?", id).
+		Updates(map[string]any{"status": status, "processed_url": processedURL}).Error
 }
 
 func (r *part3DModelRepository) Delete(ctx context.Context, id uuid.UUID) error {
