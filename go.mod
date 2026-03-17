@@ -6,12 +6,14 @@ tool github.com/99designs/gqlgen
 
 require (
 	github.com/99designs/gqlgen v0.17.84
+	github.com/aws/aws-sdk-go-v2 v1.41.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.97.1
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/gofiber/fiber/v2 v2.52.11
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.11.2
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/vektah/gqlparser/v2 v2.5.31
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
@@ -20,7 +22,6 @@ require (
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.41.4 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.7 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.20 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.20 // indirect
