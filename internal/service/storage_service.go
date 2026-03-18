@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hoshina-dev/pasta/internal/infra/s3"
+	storage "github.com/hoshina-dev/pasta/internal/infra/s3"
 )
 
 type StorageService struct {
