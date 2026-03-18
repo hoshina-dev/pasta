@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hoshina-dev/pasta/internal/infra/rabbitmq"
@@ -121,8 +122,15 @@ func (s *OptimizationService) extractOrGenerateSourceURL(ctx context.Context, so
 }
 
 func isPresignedURL(url string) bool {
-	return len(url) > 0 && (url[:8] == "https://" || url[:7] == "http://") &&
-		(contains(url, "X-Amz-Algorithm") || contains(url, "Signature"))
+	if url == "" {
+		return false
+	}
+
+	if !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") {
+		return false
+	}
+
+	return contains(url, "X-Amz-Algorithm") || contains(url, "Signature")
 }
 
 func contains(s, substr string) bool {
