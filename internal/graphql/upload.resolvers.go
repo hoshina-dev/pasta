@@ -12,7 +12,24 @@ import (
 
 // Optimize3d is the resolver for the optimize3D field.
 func (r *mutationResolver) Optimize3d(ctx context.Context, input Optimize3DInput) (*Optimize3DResponse, error) {
-	panic(fmt.Errorf("not implemented: Optimize3d - optimize3D"))
+	params := service.Optimize3DParams{
+		SourceURL:                 input.SourceURL,
+		DracoCompressionLevel:     input.DracoCompressionLevel,
+		DracoPositionQuantization: input.DracoPositionQuantization,
+		DracoTexcoordQuantization: input.DracoTexcoordQuantization,
+		DracoNormalQuantization:   input.DracoNormalQuantization,
+		DracoGenericQuantization:  input.DracoGenericQuantization,
+	}
+
+	jobID, status, err := r.Resolver.optimizationService.Optimize3D(ctx, params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start optimization job: %w", err)
+	}
+
+	return &Optimize3DResponse{
+		JobID:  jobID,
+		Status: status,
+	}, nil
 }
 
 // GenerateUploadURL is the resolver for the generateUploadURL field.
