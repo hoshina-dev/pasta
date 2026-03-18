@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -11,9 +10,6 @@ type Config struct {
 	DataSourceName         string
 	Port                   string
 	CORSOrigins            string
-	RedisURL               string
-	RedisPassword          string
-	RedisDB                int
 	S3Bucket               string
 	S3Region               string
 	S3BaseURL              string
@@ -26,15 +22,10 @@ type Config struct {
 func Load() *Config {
 	_ = godotenv.Load()
 
-	redisDB, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
-
 	return &Config{
 		DataSourceName:         os.Getenv("DATA_SOURCE_NAME"),
 		Port:                   getEnvOrDefault("PORT", "8080"),
 		CORSOrigins:            getEnvOrDefault("CORS_ORIGINS", "*"),
-		RedisURL:               getEnvOrDefault("REDIS_URL", "localhost:6379"),
-		RedisPassword:          os.Getenv("REDIS_PASSWORD"),
-		RedisDB:                redisDB,
 		S3Bucket:               os.Getenv("S3_BUCKET"),
 		S3Region:               getEnvOrDefault("S3_REGION", "us-east-1"),
 		S3BaseURL:              os.Getenv("S3_BASE_URL"),
