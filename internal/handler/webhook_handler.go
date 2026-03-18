@@ -51,6 +51,11 @@ type OptimizationWebhookPayload struct {
 }
 
 func (h *WebhookHandler) HandleOptimizationCallback(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	var payload OptimizationWebhookPayload
 	if err := c.BodyParser(&payload); err != nil {
 		log.Printf("failed to parse webhook payload: %v", err)
@@ -70,7 +75,7 @@ func (h *WebhookHandler) HandleOptimizationCallback(c *fiber.Ctx) error {
 		})
 	}
 
-	model3D, err := h.part3DModelRepo.GetByID(c.Context(), jobID)
+	model3D, err := h.part3DModelRepo.GetByID(ctx, jobID)
 	if err != nil {
 		log.Printf("failed to get 3D model: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -98,7 +103,7 @@ func (h *WebhookHandler) HandleOptimizationCallback(c *fiber.Ctx) error {
 		log.Printf("optimization job failed - logs:\n%s", payload.Logs)
 	}
 
-	err = h.part3DModelRepo.UpdateStatus(c.Context(), jobID, string(status), processedURL)
+	err = h.part3DModelRepo.UpdateStatus(ctx, jobID, string(status), processedURL)
 	if err != nil {
 		log.Printf("failed to update 3D model status: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -106,7 +111,7 @@ func (h *WebhookHandler) HandleOptimizationCallback(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.logJobExecution(c.Context(), jobID, model3D, payload); err != nil {
+	if err := h.logJobExecution(ctx, jobID, model3D, payload); err != nil {
 		log.Printf("failed to log job execution: %v", err)
 	}
 
