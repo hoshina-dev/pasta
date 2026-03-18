@@ -65,7 +65,13 @@ type ComplexityRoot struct {
 		CreateManufacturer func(childComplexity int, input model.CreateManufacturerInput) int
 		CreatePart         func(childComplexity int, input model.CreatePartInput) int
 		DeletePart         func(childComplexity int, id uuid.UUID) int
+		Optimize3d         func(childComplexity int, input Optimize3DInput) int
 		UpdatePart         func(childComplexity int, id uuid.UUID, input model.UpdatePartInput) int
+	}
+
+	Optimize3DResponse struct {
+		JobID  func(childComplexity int) int
+		Status func(childComplexity int) int
 	}
 
 	Part struct {
@@ -85,12 +91,18 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Categories    func(childComplexity int) int
-		Manufacturer  func(childComplexity int, id uuid.UUID) int
-		Manufacturers func(childComplexity int) int
-		Part          func(childComplexity int, id uuid.UUID) int
-		Parts         func(childComplexity int) int
-		SearchParts   func(childComplexity int, name string) int
+		Categories        func(childComplexity int) int
+		GenerateUploadURL func(childComplexity int, input GenerateUploadURLInput) int
+		Manufacturer      func(childComplexity int, id uuid.UUID) int
+		Manufacturers     func(childComplexity int) int
+		Part              func(childComplexity int, id uuid.UUID) int
+		Parts             func(childComplexity int) int
+		SearchParts       func(childComplexity int, name string) int
+	}
+
+	UploadURLResponse struct {
+		FileKey   func(childComplexity int) int
+		UploadURL func(childComplexity int) int
 	}
 }
 
@@ -100,6 +112,7 @@ type MutationResolver interface {
 	DeletePart(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateCategory(ctx context.Context, input model.CreateCategoryInput) (*model.Category, error)
 	CreateManufacturer(ctx context.Context, input model.CreateManufacturerInput) (*model.Manufacturer, error)
+	Optimize3d(ctx context.Context, input Optimize3DInput) (*Optimize3DResponse, error)
 }
 type PartResolver interface {
 	Images(ctx context.Context, obj *model.Part) ([]string, error)
@@ -111,6 +124,7 @@ type QueryResolver interface {
 	Categories(ctx context.Context) ([]*model.Category, error)
 	Manufacturer(ctx context.Context, id uuid.UUID) (*model.Manufacturer, error)
 	Manufacturers(ctx context.Context) ([]*model.Manufacturer, error)
+	GenerateUploadURL(ctx context.Context, input GenerateUploadURLInput) (*UploadURLResponse, error)
 }
 
 type executableSchema struct {
@@ -208,6 +222,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DeletePart(childComplexity, args["id"].(uuid.UUID)), true
+	case "Mutation.optimize3D":
+		if e.complexity.Mutation.Optimize3d == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_optimize3D_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Optimize3d(childComplexity, args["input"].(Optimize3DInput)), true
 	case "Mutation.updatePart":
 		if e.complexity.Mutation.UpdatePart == nil {
 			break
@@ -219,6 +244,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.UpdatePart(childComplexity, args["id"].(uuid.UUID), args["input"].(model.UpdatePartInput)), true
+
+	case "Optimize3DResponse.jobID":
+		if e.complexity.Optimize3DResponse.JobID == nil {
+			break
+		}
+
+		return e.complexity.Optimize3DResponse.JobID(childComplexity), true
+	case "Optimize3DResponse.status":
+		if e.complexity.Optimize3DResponse.Status == nil {
+			break
+		}
+
+		return e.complexity.Optimize3DResponse.Status(childComplexity), true
 
 	case "Part.categories":
 		if e.complexity.Part.Categories == nil {
@@ -305,6 +343,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Categories(childComplexity), true
+	case "Query.generateUploadURL":
+		if e.complexity.Query.GenerateUploadURL == nil {
+			break
+		}
+
+		args, err := ec.field_Query_generateUploadURL_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GenerateUploadURL(childComplexity, args["input"].(GenerateUploadURLInput)), true
 	case "Query.manufacturer":
 		if e.complexity.Query.Manufacturer == nil {
 			break
@@ -351,6 +400,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.SearchParts(childComplexity, args["name"].(string)), true
 
+	case "UploadURLResponse.fileKey":
+		if e.complexity.UploadURLResponse.FileKey == nil {
+			break
+		}
+
+		return e.complexity.UploadURLResponse.FileKey(childComplexity), true
+	case "UploadURLResponse.uploadURL":
+		if e.complexity.UploadURLResponse.UploadURL == nil {
+			break
+		}
+
+		return e.complexity.UploadURLResponse.UploadURL(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -362,6 +424,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateCategoryInput,
 		ec.unmarshalInputCreateManufacturerInput,
 		ec.unmarshalInputCreatePartInput,
+		ec.unmarshalInputGenerateUploadURLInput,
+		ec.unmarshalInputOptimize3DInput,
 		ec.unmarshalInputUpdatePartInput,
 	)
 	first := true
@@ -459,7 +523,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "category.graphqls" "common.graphqls" "manufacturer.graphqls" "part.graphqls"
+//go:embed "category.graphqls" "common.graphqls" "manufacturer.graphqls" "part.graphqls" "upload.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -475,6 +539,7 @@ var sources = []*ast.Source{
 	{Name: "common.graphqls", Input: sourceData("common.graphqls"), BuiltIn: false},
 	{Name: "manufacturer.graphqls", Input: sourceData("manufacturer.graphqls"), BuiltIn: false},
 	{Name: "part.graphqls", Input: sourceData("part.graphqls"), BuiltIn: false},
+	{Name: "upload.graphqls", Input: sourceData("upload.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -526,6 +591,17 @@ func (ec *executionContext) field_Mutation_deletePart_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_optimize3D_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNOptimize3DInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐOptimize3DInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updatePart_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -550,6 +626,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_generateUploadURL_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGenerateUploadURLInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐGenerateUploadURLInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1054,6 +1141,111 @@ func (ec *executionContext) fieldContext_Mutation_createManufacturer(ctx context
 	if fc.Args, err = ec.field_Mutation_createManufacturer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_optimize3D(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_optimize3D,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().Optimize3d(ctx, fc.Args["input"].(Optimize3DInput))
+		},
+		nil,
+		ec.marshalNOptimize3DResponse2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐOptimize3DResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_optimize3D(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "jobID":
+				return ec.fieldContext_Optimize3DResponse_jobID(ctx, field)
+			case "status":
+				return ec.fieldContext_Optimize3DResponse_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Optimize3DResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_optimize3D_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Optimize3DResponse_jobID(ctx context.Context, field graphql.CollectedField, obj *Optimize3DResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Optimize3DResponse_jobID,
+		func(ctx context.Context) (any, error) {
+			return obj.JobID, nil
+		},
+		nil,
+		ec.marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Optimize3DResponse_jobID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Optimize3DResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type UUID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Optimize3DResponse_status(ctx context.Context, field graphql.CollectedField, obj *Optimize3DResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Optimize3DResponse_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Optimize3DResponse_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Optimize3DResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -1765,6 +1957,53 @@ func (ec *executionContext) fieldContext_Query_manufacturers(_ context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_generateUploadURL(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_generateUploadURL,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GenerateUploadURL(ctx, fc.Args["input"].(GenerateUploadURLInput))
+		},
+		nil,
+		ec.marshalNUploadURLResponse2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐUploadURLResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_generateUploadURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "uploadURL":
+				return ec.fieldContext_UploadURLResponse_uploadURL(ctx, field)
+			case "fileKey":
+				return ec.fieldContext_UploadURLResponse_fileKey(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UploadURLResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_generateUploadURL_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1868,6 +2107,64 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UploadURLResponse_uploadURL(ctx context.Context, field graphql.CollectedField, obj *UploadURLResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UploadURLResponse_uploadURL,
+		func(ctx context.Context) (any, error) {
+			return obj.UploadURL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_UploadURLResponse_uploadURL(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UploadURLResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UploadURLResponse_fileKey(ctx context.Context, field graphql.CollectedField, obj *UploadURLResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UploadURLResponse_fileKey,
+		func(ctx context.Context) (any, error) {
+			return obj.FileKey, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_UploadURLResponse_fileKey(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UploadURLResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3477,6 +3774,102 @@ func (ec *executionContext) unmarshalInputCreatePartInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGenerateUploadURLInput(ctx context.Context, obj any) (GenerateUploadURLInput, error) {
+	var it GenerateUploadURLInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fileName", "contentType"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fileName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileName = data
+		case "contentType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentType"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentType = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputOptimize3DInput(ctx context.Context, obj any) (Optimize3DInput, error) {
+	var it Optimize3DInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"sourceURL", "dracoCompressionLevel", "dracoPositionQuantization", "dracoTexcoordQuantization", "dracoNormalQuantization", "dracoGenericQuantization"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "sourceURL":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceURL"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SourceURL = data
+		case "dracoCompressionLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dracoCompressionLevel"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DracoCompressionLevel = data
+		case "dracoPositionQuantization":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dracoPositionQuantization"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DracoPositionQuantization = data
+		case "dracoTexcoordQuantization":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dracoTexcoordQuantization"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DracoTexcoordQuantization = data
+		case "dracoNormalQuantization":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dracoNormalQuantization"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DracoNormalQuantization = data
+		case "dracoGenericQuantization":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dracoGenericQuantization"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DracoGenericQuantization = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdatePartInput(ctx context.Context, obj any) (model.UpdatePartInput, error) {
 	var it model.UpdatePartInput
 	asMap := map[string]any{}
@@ -3695,6 +4088,57 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createManufacturer(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "optimize3D":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_optimize3D(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var optimize3DResponseImplementors = []string{"Optimize3DResponse"}
+
+func (ec *executionContext) _Optimize3DResponse(ctx context.Context, sel ast.SelectionSet, obj *Optimize3DResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, optimize3DResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Optimize3DResponse")
+		case "jobID":
+			out.Values[i] = ec._Optimize3DResponse_jobID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._Optimize3DResponse_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3984,6 +4428,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "generateUploadURL":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_generateUploadURL(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -3992,6 +4458,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var uploadURLResponseImplementors = []string{"UploadURLResponse"}
+
+func (ec *executionContext) _UploadURLResponse(ctx context.Context, sel ast.SelectionSet, obj *UploadURLResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, uploadURLResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UploadURLResponse")
+		case "uploadURL":
+			out.Values[i] = ec._UploadURLResponse_uploadURL(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fileKey":
+			out.Values[i] = ec._UploadURLResponse_fileKey(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4439,6 +4949,11 @@ func (ec *executionContext) unmarshalNCreatePartInput2githubᚗcomᚋhoshinaᚑd
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNGenerateUploadURLInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐGenerateUploadURLInput(ctx context.Context, v any) (GenerateUploadURLInput, error) {
+	res, err := ec.unmarshalInputGenerateUploadURLInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNManufacturer2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v model.Manufacturer) graphql.Marshaler {
 	return ec._Manufacturer(ctx, sel, &v)
 }
@@ -4495,6 +5010,25 @@ func (ec *executionContext) marshalNManufacturer2ᚖgithubᚗcomᚋhoshinaᚑdev
 		return graphql.Null
 	}
 	return ec._Manufacturer(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNOptimize3DInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐOptimize3DInput(ctx context.Context, v any) (Optimize3DInput, error) {
+	res, err := ec.unmarshalInputOptimize3DInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNOptimize3DResponse2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐOptimize3DResponse(ctx context.Context, sel ast.SelectionSet, v Optimize3DResponse) graphql.Marshaler {
+	return ec._Optimize3DResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOptimize3DResponse2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐOptimize3DResponse(ctx context.Context, sel ast.SelectionSet, v *Optimize3DResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Optimize3DResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPart2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐPart(ctx context.Context, sel ast.SelectionSet, v model.Part) graphql.Marshaler {
@@ -4650,6 +5184,20 @@ func (ec *executionContext) marshalNUUID2ᚕgithubᚗcomᚋgoogleᚋuuidᚐUUID�
 func (ec *executionContext) unmarshalNUpdatePartInput2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐUpdatePartInput(ctx context.Context, v any) (model.UpdatePartInput, error) {
 	res, err := ec.unmarshalInputUpdatePartInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUploadURLResponse2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐUploadURLResponse(ctx context.Context, sel ast.SelectionSet, v UploadURLResponse) graphql.Marshaler {
+	return ec._UploadURLResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUploadURLResponse2ᚖgithubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋgraphqlᚐUploadURLResponse(ctx context.Context, sel ast.SelectionSet, v *UploadURLResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UploadURLResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4980,6 +5528,24 @@ func (ec *executionContext) marshalOCategory2ᚕgithubᚗcomᚋhoshinaᚑdevᚋp
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v any) (*int32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt32(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.SelectionSet, v *int32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt32(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOManufacturer2githubᚗcomᚋhoshinaᚑdevᚋpastaᚋinternalᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v model.Manufacturer) graphql.Marshaler {

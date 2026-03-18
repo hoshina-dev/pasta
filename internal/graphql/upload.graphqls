@@ -1,0 +1,31 @@
+extend type Query {
+  generateUploadURL(input: GenerateUploadURLInput!): UploadURLResponse!
+}
+
+extend type Mutation {
+  optimize3D(input: Optimize3DInput!): Optimize3DResponse!
+}
+
+input GenerateUploadURLInput {
+  fileName: String!
+  contentType: String!
+}
+
+type UploadURLResponse {
+  uploadURL: String!
+  fileKey: String!
+}
+
+input Optimize3DInput {
+  sourceURL: String!
+  dracoCompressionLevel: Int
+  dracoPositionQuantization: Int
+  dracoTexcoordQuantization: Int
+  dracoNormalQuantization: Int
+  dracoGenericQuantization: Int
+}
+
+type Optimize3DResponse {
+  jobID: UUID!
+  status: String!
+}

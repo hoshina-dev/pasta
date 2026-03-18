@@ -20,6 +20,7 @@ type Part3DModel struct {
 	PartID       uuid.UUID `gorm:"type:uuid"`
 	RawURL       string
 	ProcessedURL *string
+	ProcessedKey *string
 	FileName     string
 	FileSize     int64
 	Status       Part3DModelStatus
