@@ -11,9 +11,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/hoshina-dev/pasta/internal/graphql"
+	webhookHandler "github.com/hoshina-dev/pasta/internal/handler"
 )
 
-func New(resolver *graphql.Resolver, corsOrigins string) *fiber.App {
+func New(resolver *graphql.Resolver, webhook *webhookHandler.WebhookHandler, corsOrigins string) *fiber.App {
 	app := fiber.New()
 
 	app.Use(logger.New())
@@ -37,6 +38,8 @@ func New(resolver *graphql.Resolver, corsOrigins string) *fiber.App {
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
+
+	app.Post("/webhook/optimization", webhook.HandleOptimizationCallback)
 
 	return app
 }
