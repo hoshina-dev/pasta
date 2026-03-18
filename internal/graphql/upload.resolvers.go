@@ -8,6 +8,8 @@ package graphql
 import (
 	"context"
 	"fmt"
+
+	"github.com/hoshina-dev/pasta/internal/service"
 )
 
 // Optimize3d is the resolver for the optimize3D field.
