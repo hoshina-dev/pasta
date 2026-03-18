@@ -19,4 +19,11 @@ CREATE TABLE inventory (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE
+
+    CONSTRAINT inventory_part_xor_object
+    CHECK (
+        (part_id IS NOT NULL AND object_id IS NULL)
+        OR
+        (part_id IS NULL AND object_id IS NOT NULL)
+    )
 );
