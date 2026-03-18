@@ -144,10 +144,27 @@ func (h *WebhookHandler) logJobExecution(ctx context.Context, jobID uuid.UUID, m
 		destKey = model3D.ProcessedKey
 	}
 
+	// Resolve source and destination URLs, falling back to model data if needed.
+	sourceURL := payload.SourceURL
+	if sourceURL == "" && model3D.RawURL != "" {
+		sourceURL = model3D.RawURL
+	}
+
+	destURL := payload.DestURL
+	if destURL == "" && model3D.ProcessedKey != nil {
+		// Construct destination URL from the S3 base URL and the processed key.
+		destURL = h.s3BaseURL + "/" + *model3D.ProcessedKey
+	}
+
+	// Ensure we have non-empty URLs before creating the log entry to satisfy DB constraints.
+	if sourceURL == "" || destURL == "" {
+		return fmt.Errorf("missing source or destination URL for optimization job %s", jobID.String())
+	}
+
 	jobLog := &model.OptimizationJobLog{
 		JobID:                     jobID,
-		SourceURL:                 payload.SourceURL,
-		DestURL:                   payload.DestURL,
+		SourceURL:                 sourceURL,
+		DestURL:                   destURL,
 		SourceKey:                 sourceKey,
 		DestKey:                   destKey,
 		DracoCompressionLevel:     payload.DracoCompressionLevel,
