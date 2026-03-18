@@ -1,0 +1,13 @@
+extend type Query {
+  generateUploadURL(input: GenerateUploadURLInput!): UploadURLResponse!
+}
+
+input GenerateUploadURLInput {
+  fileName: String!
+  contentType: String!
+}
+
+type UploadURLResponse {
+  uploadURL: String!
+  fileKey: String!
+}

@@ -2,8 +2,18 @@
 
 package graphql
 
+type GenerateUploadURLInput struct {
+	FileName    string `json:"fileName"`
+	ContentType string `json:"contentType"`
+}
+
 type Mutation struct {
 }
 
 type Query struct {
+}
+
+type UploadURLResponse struct {
+	UploadURL string `json:"uploadURL"`
+	FileKey   string `json:"fileKey"`
 }

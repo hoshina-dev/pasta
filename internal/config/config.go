@@ -14,6 +14,9 @@ type Config struct {
 	RedisURL       string
 	RedisPassword  string
 	RedisDB        int
+	S3Bucket       string
+	S3Region       string
+	S3BaseURL      string
 }
 
 func Load() *Config {
@@ -28,6 +31,9 @@ func Load() *Config {
 		RedisURL:       getEnvOrDefault("REDIS_URL", "localhost:6379"),
 		RedisPassword:  os.Getenv("REDIS_PASSWORD"),
 		RedisDB:        redisDB,
+		S3Bucket:       os.Getenv("S3_BUCKET"),
+		S3Region:       getEnvOrDefault("S3_REGION", "us-east-1"),
+		S3BaseURL:      os.Getenv("S3_BASE_URL"),
 	}
 }
 
