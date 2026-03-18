@@ -3,38 +3,48 @@ package storage
 import (
 	"context"
 	"fmt"
-	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type StorageService interface {
-	Upload(key string, file io.Reader, contentType string) (string, error)
-	Delete(key string) error
+	GeneratePresignedUploadURL(ctx context.Context, key string, contentType string) (string, error)
+	Delete(ctx context.Context, key string) error
 }
 
 type s3StorageService struct {
-	client  *s3.Client
-	bucket  string
-	baseURL string
+	client         *s3.Client
+	presignClient  *s3.PresignClient
+	bucket         string
+	baseURL        string
+	presignExpiry  time.Duration
 }
 
 func NewS3StorageService(client *s3.Client, bucket, baseURL string) *s3StorageService {
-	return &s3StorageService{client: client, bucket: bucket, baseURL: baseURL}
+	presignClient := s3.NewPresignClient(client)
+	return &s3StorageService{
+		client:        client,
+		presignClient: presignClient,
+		bucket:        bucket,
+		baseURL:       baseURL,
+		presignExpiry: 15 * time.Minute,
+	}
 }
 
-func (s *s3StorageService) Upload(ctx context.Context, key string, file io.Reader, contentType string) (string, error) {
-	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
+func (s *s3StorageService) GeneratePresignedUploadURL(ctx context.Context, key string, contentType string) (string, error) {
+	presignResult, err := s.presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String(key),
-		Body:        file,
 		ContentType: aws.String(contentType),
-	})
+	}, s3.WithPresignExpires(s.presignExpiry))
+	
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
 	}
-	return fmt.Sprintf("%s/%s", s.baseURL, key), nil
+	
+	return presignResult.URL, nil
 }
 
 func (s *s3StorageService) Delete(ctx context.Context, key string) error {
