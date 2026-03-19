@@ -1,6 +1,6 @@
 ALTER TABLE parts 
-    ADD COLUMN user_id UUID NOT NULL DEFAULT gen_random_uuid(),
-    ADD COLUMN organization_id UUID NOT NULL DEFAULT gen_random_uuid(),
+    ADD COLUMN user_id UUID,
+    ADD COLUMN organization_id UUID,
     ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT TRUE;
 
 
