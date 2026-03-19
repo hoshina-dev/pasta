@@ -5,7 +5,7 @@ ALTER TABLE parts DROP COLUMN IF EXISTS user_id;
 ALTER TABLE parts DROP COLUMN IF EXISTS organization_id;
 ALTER TABLE parts DROP COLUMN IF EXISTS is_available;
 
-CREATE TABLE parts_inventory (
+CREATE TABLE IF NOT EXISTS parts_inventory (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     part_id UUID REFERENCES parts(id),
     serial_number TEXT NOT NULL UNIQUE,
