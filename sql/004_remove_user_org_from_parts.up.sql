@@ -1,9 +1,9 @@
 DROP INDEX IF EXISTS idx_parts_user_id;
 DROP INDEX IF EXISTS idx_parts_organization_id;
 
-ALTER TABLE parts DROP COLUMN user_id;
-ALTER TABLE parts DROP COLUMN organization_id;
-ALTER TABLE parts DROP COLUMN is_available;
+ALTER TABLE parts DROP COLUMN IF EXISTS user_id;
+ALTER TABLE parts DROP COLUMN IF EXISTS organization_id;
+ALTER TABLE parts DROP COLUMN IF EXISTS is_available;
 
 CREATE TABLE parts_inventory (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
