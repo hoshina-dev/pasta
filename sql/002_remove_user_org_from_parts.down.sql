@@ -7,5 +7,4 @@ ALTER TABLE parts
 CREATE INDEX IF NOT EXISTS idx_parts_organization_id ON parts(organization_id) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_parts_user_id ON parts(user_id) WHERE deleted_at IS NULL;
 
-DROP TYPE IF EXISTS inventory_type;
-DROP TABLE IF EXISTS inventory;
+DROP TABLE IF EXISTS parts_inventory;
