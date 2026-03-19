@@ -5,7 +5,7 @@ type Part3DModel {
     processedUrl: String
     processedKey: String
     fileName: String!
-    fileSize: Int64!
+    fileSize: Int64
     status: String!
 }
 
