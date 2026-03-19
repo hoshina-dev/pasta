@@ -1,14 +1,14 @@
 type Part3DModel {
-    id: UUID!
-    partId: UUID!
-    rawUrl: String!
-    processedUrl: String
-    processedKey: String
-    fileName: String!
-    fileSize: Int64
-    status: String!
+  id: UUID!
+  partId: UUID!
+  rawUrl: String!
+  processedUrl: String
+  processedKey: String
+  fileName: String!
+  fileSize: Int64
+  status: String!
 }
 
 extend type Part {
-    models3D: [Part3DModel!]!
+  models3D: [Part3DModel!]!
 }
