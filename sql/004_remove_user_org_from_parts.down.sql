@@ -1,7 +1,8 @@
 ALTER TABLE parts 
     ADD COLUMN user_id UUID,
     ADD COLUMN organization_id UUID,
-    ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT TRUE;
+    ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT TRUE,
+    ADD COLUMN condition TEXT NOT NULL;
 
 
 CREATE INDEX IF NOT EXISTS idx_parts_organization_id ON parts(organization_id) WHERE deleted_at IS NULL;
