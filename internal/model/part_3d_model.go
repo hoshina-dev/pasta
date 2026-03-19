@@ -28,3 +28,7 @@ type Part3DModel struct {
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 	DeletedAt    gorm.DeletedAt
 }
+
+func (Part3DModel) TableName() string {
+	return "part_3d_models"
+}
