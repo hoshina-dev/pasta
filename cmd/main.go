@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	appConfig "github.com/hoshina-dev/pasta/internal/config"
@@ -27,12 +28,25 @@ func main() {
 	}
 
 	ctx := context.Background()
-	awsCfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(cfg.S3Region))
+	cfgOpts := []func(*config.LoadOptions) error{
+		config.WithRegion(cfg.S3Region),
+	}
+	if cfg.S3Endpoint != "" {
+		cfgOpts = append(cfgOpts, config.WithEndpointResolverWithOptions(
+			aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				if service == s3.ServiceID {
+					return aws.Endpoint{URL: cfg.S3Endpoint}, nil
+				}
+				return aws.Endpoint{}, nil
+			}),
+		))
+	}
+	awsConfig, err := config.LoadDefaultConfig(ctx, cfgOpts...)
 	if err != nil {
 		log.Fatalf("failed to load AWS config: %v", err)
 	}
 
-	s3Client := s3.NewFromConfig(awsCfg)
+	s3Client := s3.NewFromConfig(awsConfig)
 	s3Storage := storage.NewS3StorageService(s3Client, cfg.S3Bucket, cfg.S3BaseURL)
 
 	rabbitConn, rabbitCh, err := rabbitmq.Connect(cfg.RabbitMQURL)
